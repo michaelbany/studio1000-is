@@ -58,7 +58,11 @@ const projects = usePage().props.projects as any;
                     <div class="flex items-center gap-2">
                         <div class="flex items-center gap-2">
                             <component :is="Users" class="size-5" />
-                            <span>{{ project.members.length }}</span>
+                            <span>{{
+                                new Set(
+                                    project.members.filter((member: any) => member.membership.status === 'approved').map((member: any) => member.id),
+                                ).size
+                            }}</span>
                         </div>
                         <Button
                             v-if="project.external_link"
