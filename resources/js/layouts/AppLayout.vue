@@ -12,9 +12,6 @@ withDefaults(defineProps<Props>(), {
 </script>
 
 <template>
-    <pre>
-        {{ Object.fromEntries(Object.entries($page.props).filter(([key]) => key !== 'ziggy')) }}
-    </pre>
     <AppLayout :breadcrumbs="breadcrumbs">
         <slot />
     </AppLayout>

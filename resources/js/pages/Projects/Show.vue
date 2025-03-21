@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { can } from '@/composables/usePermissions';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { label, statusColor } from '@/lib/helpers';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
@@ -44,7 +45,7 @@ const page = computed(() => usePage().props as any);
                     <div class="flex flex-wrap items-center gap-3 pt-3 sm:pt-0">
                         <Dialog v-model:open="modal">
                             <DialogTrigger as-child>
-                                <Button>
+                                <Button :disabled="!can('project:join')">
                                     <component :is="UserPlus2" class="size-5" />
                                     Join project
                                 </Button>
@@ -81,9 +82,9 @@ const page = computed(() => usePage().props as any);
 
             <Separator />
 
-            <div v-if="$page.props.project.members && $page.props.project.members.length">
+            <div v-if="page.project.members && page.project.members.length">
                 <div
-                    v-for="member in $page.props.project.members"
+                    v-for="member in page.project.members"
                     :key="member.id"
                     class="flex items-center justify-between rounded-lg p-4 transition-colors hover:bg-stone-100 dark:hover:bg-stone-900"
                 >
