@@ -77,6 +77,15 @@ export function label(text?: string) {
         .join(' ');
 }
 
+export function ellipsis(text: string, { length = 20, breakPoint = null }: { length?: number; breakPoint?: number | null } = {}) {
+    const isSmallScreen = breakPoint ? window.innerWidth > breakPoint : false;
+
+    if (isSmallScreen || text.length <= length) {
+        return text;
+    }
+
+    return text.slice(0, length) + '...';
+}
 
 export function statusColor(status: string) {
     switch (status) {

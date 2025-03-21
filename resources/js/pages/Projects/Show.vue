@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Can from '@/components/Can.vue';
 import InputError from '@/components/InputError.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,8 +10,8 @@ import { Separator } from '@/components/ui/separator';
 import { can } from '@/composables/usePermissions';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { label, statusColor } from '@/lib/helpers';
-import { Head, useForm, usePage } from '@inertiajs/vue3';
-import { User, UserPlus2 } from 'lucide-vue-next';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
+import { Edit, Edit2, User, UserPlus2 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 const form = useForm({
@@ -36,13 +37,18 @@ const page = computed(() => usePage().props as any);
     <Head :title="page.project?.name" />
     <AppLayout>
         <div class="flex flex-col gap-4 rounded-xl p-4">
-            <div class="relative min-h-[100vh] flex-1 rounded-xl dark:border-sidebar-border md:min-h-min">
-                <div class="flex flex-col justify-between rounded-lg p-5 sm:flex-row">
+            <div class="relative flex-1 rounded-xl dark:border-sidebar-border md:min-h-min">
+                <div class="flex flex-col justify-between items-start rounded-lg p-5 sm:flex-row">
                     <div>
                         <h1 class="text-4xl font-semibold leading-tight">{{ page.project?.name }}</h1>
-                        <p class="leading-8 text-gray-500">{{ page.project?.description }}</p>
+                        <p class="leading-8 text-gray-500 mt-3">{{ page.project?.description }}</p>
                     </div>
-                    <div class="flex flex-wrap items-center gap-3 pt-3 sm:pt-0">
+                    <div class="flex items-center gap-3 mt-3">
+                        <Can permission="project:update">
+                            <Button :as="Link" size="icon" variant="ghost" :href="`/project/${page.project.id}/edit`">
+                                <component :is="Edit" class="size-5" />
+                            </Button>
+                        </Can>
                         <Dialog v-model:open="modal">
                             <DialogTrigger as-child>
                                 <Button :disabled="!can('project:join')">

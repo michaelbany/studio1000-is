@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import Button from '@/components/ui/button/Button.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { ellipsis } from '@/lib/helpers';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { Link2, Plus, Users } from 'lucide-vue-next';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -42,11 +43,11 @@ const projects = usePage().props.projects as any;
                     v-for="project in projects"
                     :key="project.id"
                     class="flex items-center justify-between cursor-pointer rounded-lg p-4 transition-colors hover:bg-stone-100 dark:hover:bg-stone-900"
-                    @click="$inertia.visit(route('project.show', project.id))"
+                    @click="router.visit(route('project.show', project.id))"
                 >
                     <div>
                         <p class="font-semibold">{{ project.name }}</p>
-                        <p class="text-sm text-gray-500">{{ project.description }}</p>
+                        <p class="text-sm text-gray-500">{{ ellipsis(project.description, { length: 200 }) }}</p>
                     </div>
 
                     <div class="flex items-center gap-2">

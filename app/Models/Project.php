@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\ProjectRolesEnum;
 use App\Enums\ProjectStatusEnum;
+use App\Enums\StatusEnum;
 use Illuminate\Database\Eloquent\Model;
 
 class Project extends Model
@@ -25,6 +26,6 @@ class Project extends Model
 
     public function owners()
     {
-        return $this->members()->wherePivot('role', ProjectRolesEnum::OWNER)->get();
+        return $this->members()->wherePivot('role', ProjectRolesEnum::OWNER)->wherePivot('status', StatusEnum::APPROVED, true)->get();
     }
 }

@@ -66,8 +66,12 @@ class User extends Authenticatable
         $policies = Gate::policies();
         $permissions = collect();
         $routeModels = collect($request->route()->parameters())->mapWithKeys(function ($model) {
+            if (is_string($model)) {
+                return [];
+            }
             return [get_class($model) => $model];
         });
+
 
         foreach ($policies as $modelClass => $policyClass) {
             $policy = Gate::resolvePolicy($policyClass);

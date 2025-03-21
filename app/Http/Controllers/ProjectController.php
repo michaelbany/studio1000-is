@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Enums\ProjectRolesEnum;
+use App\Enums\ProjectStatusEnum;
 use App\Enums\StatusEnum;
 use App\Models\Project;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class ProjectController extends Controller
 {
@@ -28,6 +30,8 @@ class ProjectController extends Controller
 
     public function store(Request $request)
     {
+        Gate::auhtorize('create', Project::class);
+        
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
@@ -49,6 +53,30 @@ class ProjectController extends Controller
                 'approved_at' => now(),
             ]);
         }
+
+        return redirect()->route('project.show', $project);
+    }
+
+    public function edit(Project $project)
+    {
+        return inertia('Projects/Edit', [
+            'project' => $project->load('members'),
+            'status' => ProjectStatusEnum::cases(),
+        ]);
+    }
+
+    public function update(Request $request, Project $project)
+    {
+        Gate::authorize('update', $project);
+
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['required', 'string'],
+            'external_link' => ['nullable', 'url'],
+            'status' => ['required', Rule::enum(ProjectStatusEnum::class)],
+        ]);
+
+        $project->update($request->only('name', 'description', 'external_link'));
 
         return redirect()->route('project.show', $project);
     }

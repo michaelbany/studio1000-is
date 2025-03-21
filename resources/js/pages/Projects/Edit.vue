@@ -3,22 +3,26 @@ import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectTrigger, SelectValue } from '@/components/ui/select';
+import SelectContent from '@/components/ui/select/SelectContent.vue';
+import SelectItem from '@/components/ui/select/SelectItem.vue';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { label } from '@/lib/helpers';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 
+
+const page = usePage().props as any;
+
 const form = useForm({
-    name: '',
-    description: '',
-    join_as: '',
+    name: page.project?.name,
+    description: page.project?.description,
+    external_link: page.project?.external_link,
+    status: page.project?.status,
 });
 
-const page = usePage().props;
-
 const submit = () => {
-    form.post(route('project.store'), {
+    form.patch(route('project.update', page.project.id), {
         preserveScroll: true,
     });
 };
@@ -52,16 +56,22 @@ const submit = () => {
                 </div>
 
                 <div class="grid gap-2">
-                    <Label for="external_link">Join As</Label>
-                    <Select v-model="form.join_as" id="join_as" class="mt-1 block">
+                    <Label for="external_link">Link to Project</Label>
+                    <Input v-model="form.external_link" id="external_link" class="mt-1 block w-full" placeholder="External Link" />
+                    <InputError class="mt-2" :message="form.errors.external_link" />
+                </div>
+
+                <div class="grid gap-2">
+                    <Label for="external_link">Status</Label>
+                    <Select v-model="form.status" id="join_as" class="mt-1 block">
                         <SelectTrigger class="w-[180px]">
-                            <SelectValue placeholder="Select a role" />
+                            <SelectValue placeholder="Select project status" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem v-for="(role, i) in page.roles" :key="i" :value="role"> {{ label(role) }} </SelectItem>
+                            <SelectItem v-for="(status, i) in page.status" :key="i" :value="status"> {{ label(status) }} </SelectItem>
                         </SelectContent>
                     </Select>
-                    <InputError class="mt-2" :message="form.errors.join_as" />
+                    <InputError class="mt-2" :message="form.errors.status" />
                 </div>
 
                 <div class="flex items-center gap-4">

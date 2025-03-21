@@ -18,11 +18,11 @@ Route::get('dashboard', function () {
 
 
 Route::group(['prefix' => 'project'], function () {
-    Route::get('/create', [ProjectController::class, 'create'])->name('project.create');
+    Route::get('/create', [ProjectController::class, 'create'])->name('project.create')->middleware('can:create,App\Models\Project');
     Route::post('/', [ProjectController::class, 'store'])->name('project.store');
     Route::get('/{project}', [ProjectController::class, 'show'])->name('project.show');
-    Route::get('/{project}/edit', [ProjectController::class, 'edit'])->name('project.edit');
-    Route::put('/{project}', [ProjectController::class, 'update'])->name('project.update');
+    Route::get('/{project}/edit', [ProjectController::class, 'edit'])->name('project.edit')->middleware('can:update,project');
+    Route::patch('/{project}', [ProjectController::class, 'update'])->name('project.update');
     Route::delete('/{project}', [ProjectController::class, 'destroy'])->name('project.destroy');
 
     Route::group(['prefix' => '{project}/member'], function () {
