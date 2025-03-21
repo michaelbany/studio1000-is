@@ -31,10 +31,7 @@ const handleUpdateUser = (value: any) => {
         role: value.split('-')[0],
     });
 }
-
-
 </script>
-
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
         <Head title="Users settings" />

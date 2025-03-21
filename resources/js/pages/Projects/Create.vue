@@ -28,7 +28,7 @@ const submit = () => {
     <Head title="Create Project" />
     <AppLayout>
         <div class="flex flex-col gap-4 rounded-xl p-4">
-            <div class="relative min-h-[100vh] flex-1 rounded-xl dark:border-sidebar-border md:min-h-min">
+            <div class="relative flex-1 rounded-xl dark:border-sidebar-border md:min-h-min">
                 <div class="flex flex-col justify-between rounded-lg p-5 sm:flex-row">
                     <div>
                         <h1 class="text-4xl font-semibold leading-tight">Create Project</h1>

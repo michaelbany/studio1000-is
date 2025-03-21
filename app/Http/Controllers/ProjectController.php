@@ -14,6 +14,10 @@ class ProjectController extends Controller
 {
     public function show(Project $project)
     {
+        if (Gate::denies('view', $project)) {
+            abort(404);
+        }
+
         return inertia('Projects/Show', [
             'project' => $project,
             'members' => $project->members
@@ -80,7 +84,7 @@ class ProjectController extends Controller
             'status' => ['required', Rule::enum(ProjectStatusEnum::class)],
         ]);
 
-        $project->update($request->only('name', 'description', 'external_link'));
+        $project->update($request->only('name', 'description', 'external_link', 'status'));
 
         return redirect()->route('project.show', $project);
     }

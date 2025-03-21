@@ -23,7 +23,19 @@ class ProjectPolicy
      */
     public function view(User $user, Project $project): bool
     {
-        return true;
+        if ($project->status === ProjectStatusEnum::ARCHIVED && $user->role !== RolesEnum::ADMIN) {
+            return false;
+        }
+
+        if ($user->role === RolesEnum::ADMIN || $project->owners()->contains($user) || $user->role === RolesEnum::MODERATOR) {
+            return true;
+        }
+
+        if ($project->status === ProjectStatusEnum::OPEN) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

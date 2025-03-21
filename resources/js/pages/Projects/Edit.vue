@@ -32,7 +32,7 @@ const submit = () => {
     <Head title="Edit Project" />
     <AppLayout>
         <div class="flex flex-col gap-4 rounded-xl p-4">
-            <div class="relative min-h-[100vh] flex-1 rounded-xl dark:border-sidebar-border md:min-h-min">
+            <div class="relative flex-1 rounded-xl dark:border-sidebar-border md:min-h-min">
                 <div class="flex flex-col justify-between rounded-lg p-5 sm:flex-row">
                     <div>
                         <h1 class="text-4xl font-semibold leading-tight">Edit Project</h1>
@@ -62,8 +62,8 @@ const submit = () => {
                 </div>
 
                 <div class="grid gap-2">
-                    <Label for="external_link">Status</Label>
-                    <Select v-model="form.status" id="join_as" class="mt-1 block">
+                    <Label for="status">Status</Label>
+                    <Select v-model="form.status" id="status" class="mt-1 block">
                         <SelectTrigger class="w-[180px]">
                             <SelectValue placeholder="Select project status" />
                         </SelectTrigger>

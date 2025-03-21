@@ -97,6 +97,8 @@ export function statusColor(status: string) {
         case 'closed':
         case 'rejected':
             return 'bg-red-500/20 text-red-500 hover:bg-red-500/30';
+        case 'archived':
+            return 'bg-blue-500/20 text-blue-500 hover:bg-blue-500/30';
         default:
             return 'bg-gray-500/20 text-gray-500 hover:bg-gray-500/30';
     }

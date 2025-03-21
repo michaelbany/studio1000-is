@@ -13,13 +13,16 @@ Route::get('/', function () {
 
 Route::get('dashboard', function () {
     return Inertia::render('Dashboard', [
-        'projects' => Project::with('members')->get()->map(function ($project) {
-            $visibleMembers = $project->members
-                ->filter(fn($member) => Gate::allows('view', $member->membership))
-                ->values();
-    
-            return $project->setRelation('members', $visibleMembers);
-        }),
+        'projects' => Project::with('members')->get()
+            ->filter(fn($project) => Gate::allows('view', $project))
+            ->map(function ($project) {
+                $visibleMembers = $project->members
+                    ->filter(fn($member) => Gate::allows('view', $member->membership))
+                    ->values();
+
+                return $project->setRelation('members', $visibleMembers);
+            })
+            ->values(),
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
