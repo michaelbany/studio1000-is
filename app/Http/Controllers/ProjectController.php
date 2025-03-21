@@ -14,6 +14,7 @@ class ProjectController extends Controller
     {
         return inertia('Projects/Show', [
             'project' => $project->load('members'),
+            'roles' => ProjectRolesEnum::cases(),
         ]);
     }
 
@@ -41,6 +42,6 @@ class ProjectController extends Controller
             'role' => $request->join_as ?? ProjectRolesEnum::OWNER,
         ]);
 
-        return redirect()->route('projects.show', $project);
+        return redirect()->route('project.show', $project);
     }
 }

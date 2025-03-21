@@ -5,7 +5,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { label, statusColor } from '@/lib/helpers';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/vue3';
-import { Plus } from 'lucide-vue-next';
+import { Link2, Plus, Users } from 'lucide-vue-next';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -27,11 +27,11 @@ const projects = usePage().props.projects as any;
                     <div>
                         <h1 class="text-4xl font-semibold leading-tight">Dashboard</h1>
 
-                        <p class="leading-8 text-gray-500">Welcome to your Dashboard 🎉</p>
+                        <p class="leading-8 text-gray-500">Welcome to the Dashboard</p>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-3 pt-3 sm:pt-0">
-                        <Button :as="Link" href="/projects/create">
+                        <Button :as="Link" href="/project/create">
                             <component :is="Plus" class="size-5" />
                             Create project
                         </Button>
@@ -43,7 +43,8 @@ const projects = usePage().props.projects as any;
                 <div
                     v-for="project in projects"
                     :key="project.id"
-                    class="flex items-center justify-between rounded-lg p-4 transition-colors hover:bg-stone-100 dark:hover:bg-stone-900"
+                    class="flex items-center justify-between cursor-pointer rounded-lg p-4 transition-colors hover:bg-stone-100 dark:hover:bg-stone-900"
+                    @click="$inertia.visit(route('project.show', project.id))"
                 >
                     <div>
                         <p class="font-semibold">{{ project.name }}</p>
@@ -51,11 +52,14 @@ const projects = usePage().props.projects as any;
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <!-- {{ project }} -->
-                        <!-- <component :is="User" class="size-5" /> -->
-                        <!-- <span>{{ label(member.membership.role) }}</span> -->
+                        <div class="flex items-center gap-2">
+                            <component :is="Users" class="size-5" />
+                            <span>{{ project.members.length }}</span>
+                        </div>
+                        <Button v-if="project.external_link" size="icon" variant="ghost" as="a" :href="project.external_link" target="_blank" class="cursor-pointer">
+                            <component :is="Link2" class="size-5" />
+                        </Button>
                     </div>
-                    <!-- <Badge :class="statusColor(member.membership.status)">{{ label(member.membership.status) }}</Badge> -->
                 </div>
             </div>
 
