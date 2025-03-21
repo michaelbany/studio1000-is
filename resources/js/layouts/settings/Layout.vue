@@ -2,8 +2,10 @@
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { can, usePermissions } from '@/composables/usePermissions';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
+import { onBeforeMount, onMounted } from 'vue';
 
 const sidebarNavItems: NavItem[] = [
     {
@@ -19,6 +21,15 @@ const sidebarNavItems: NavItem[] = [
         href: '/settings/appearance',
     },
 ];
+
+onBeforeMount(() => {
+    if (can('user:edit')) {
+        sidebarNavItems.push({
+            title: 'Users',
+            href: '/settings/users',
+        });
+    }
+});
 
 const page = usePage();
 
