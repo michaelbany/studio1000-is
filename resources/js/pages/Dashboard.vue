@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import Can from '@/components/Can.vue';
+import Badge from '@/components/ui/badge/Badge.vue';
 import Button from '@/components/ui/button/Button.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { ellipsis } from '@/lib/helpers';
+import { ellipsis, label, statusColor } from '@/lib/helpers';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { Link2, Plus, Users } from 'lucide-vue-next';
@@ -19,7 +20,6 @@ const projects = usePage().props.projects as any;
 
 <template>
     <Head title="Dashboard" />
-
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex flex-col gap-4 rounded-xl p-4">
             <div class="relative min-h-[100vh] flex-1 rounded-xl dark:border-sidebar-border md:min-h-min">
@@ -45,20 +45,30 @@ const projects = usePage().props.projects as any;
                 <div
                     v-for="project in projects"
                     :key="project.id"
-                    class="flex items-center justify-between cursor-pointer rounded-lg p-4 transition-colors hover:bg-stone-100 dark:hover:bg-stone-900"
+                    class="flex cursor-pointer items-center justify-between rounded-lg p-4 transition-colors hover:bg-stone-100 dark:hover:bg-stone-900"
                     @click="router.visit(route('project.show', project.id))"
                 >
                     <div>
                         <p class="font-semibold">{{ project.name }}</p>
-                        <p class="text-sm text-gray-500">{{ ellipsis(project.description, { length: 200 }) }}</p>
+                        <p class="max-w-[800px] text-sm text-gray-500">{{ ellipsis(project.description, { length: 200 }) }}</p>
                     </div>
+
+                    <Badge :class="statusColor(project?.status)" class="mt-2">{{ label(project?.status) }}</Badge>
 
                     <div class="flex items-center gap-2">
                         <div class="flex items-center gap-2">
                             <component :is="Users" class="size-5" />
                             <span>{{ project.members.length }}</span>
                         </div>
-                        <Button v-if="project.external_link" size="icon" variant="ghost" as="a" :href="project.external_link" target="_blank" class="cursor-pointer">
+                        <Button
+                            v-if="project.external_link"
+                            size="icon"
+                            variant="ghost"
+                            as="a"
+                            :href="project.external_link"
+                            target="_blank"
+                            class="cursor-pointer"
+                        >
                             <component :is="Link2" class="size-5" />
                         </Button>
                     </div>

@@ -91,8 +91,10 @@ export function statusColor(status: string) {
     switch (status) {
         case 'pending':
             return 'bg-yellow-500/20 text-yellow-500 hover:bg-yellow-500/30';
+        case 'open':
         case 'approved':
             return 'bg-green-500/20 text-green-500 hover:bg-green-500/30';
+        case 'closed':
         case 'rejected':
             return 'bg-red-500/20 text-red-500 hover:bg-red-500/30';
         default:

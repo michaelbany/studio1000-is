@@ -48,6 +48,7 @@ const page = computed(() => usePage().props as any);
                 <div class="flex flex-col items-start justify-between rounded-lg p-5 sm:flex-row">
                     <div>
                         <h1 class="text-4xl font-semibold leading-tight">{{ page.project?.name }}</h1>
+                        <Badge :class="statusColor(page.project?.status)" class="mt-2">{{ label(page.project?.status) }}</Badge>
                         <p class="mt-3 leading-8 text-gray-500 whitespace-pre-wrap">{{ page.project?.description }}</p>
                     </div>
                     <div class="mt-3 flex items-center gap-3">
@@ -109,7 +110,7 @@ const page = computed(() => usePage().props as any);
                         <span>{{ label(member.membership.role) }}</span>
                     </div>
 
-                    <Can :permission="page.auth.user.id === member.id && member.membership.role === 'owner' ? false : 'project:member_checkout'">
+                    <Can :permission="(page.auth.user.id === member.id && member.membership.role === 'owner') || member.role === 'admin' ? false : 'project:member_checkout'">
                         <Select @update:model-value="handleChangeStatus" id="status" class="mt-1 block">
                             <SelectTrigger class="w-min">
                                 <Badge :class="statusColor(member.membership.status)">{{ label(member.membership.status) }}</Badge>

@@ -37,7 +37,7 @@ const handleUpdateUser = (value: any) => {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Head title="Profile settings" />
+        <Head title="Users settings" />
 
         <SettingsLayout>
             <div class="flex flex-col space-y-6">
