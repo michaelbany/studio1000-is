@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import { Badge } from '@/components/ui/badge';
 import Button from '@/components/ui/button/Button.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { label, statusColor } from '@/lib/helpers';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import { Link2, Plus, Users } from 'lucide-vue-next';

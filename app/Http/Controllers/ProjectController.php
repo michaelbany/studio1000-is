@@ -39,8 +39,16 @@ class ProjectController extends Controller
         $project = $user->projects()->create($request->only('name', 'description'), [
             'status' => StatusEnum::APPROVED,
             'approved_at' => now(),
-            'role' => $request->join_as ?? ProjectRolesEnum::OWNER,
+            'role' => ProjectRolesEnum::OWNER,
         ]);
+
+        if ($request->filled('join_as')) {
+            $project->members()->attach($user->id, [
+                'role' => $request->join_as,
+                'status' => StatusEnum::APPROVED,
+                'approved_at' => now(),
+            ]);
+        }
 
         return redirect()->route('project.show', $project);
     }
