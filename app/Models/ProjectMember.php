@@ -18,6 +18,16 @@ class ProjectMember extends Pivot
         'status' => StatusEnum::class,
     ];
 
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function approve(): void
     {
         $this->update([

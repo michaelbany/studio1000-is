@@ -3,8 +3,7 @@
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectMemberController;
 use App\Models\Project;
-use App\Models\ProjectMember;
-use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -14,7 +13,13 @@ Route::get('/', function () {
 
 Route::get('dashboard', function () {
     return Inertia::render('Dashboard', [
-        'projects' => Project::all()->load('members'),
+        'projects' => Project::with('members')->get()->map(function ($project) {
+            $visibleMembers = $project->members
+                ->filter(fn($member) => Gate::allows('view', $member->membership))
+                ->values();
+    
+            return $project->setRelation('members', $visibleMembers);
+        }),
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -33,8 +38,7 @@ Route::group(['prefix' => 'project'], function () {
 
         Route::patch('/{member}/checkout', [ProjectMemberController::class, 'checkout'])->name('project.member.checkout')->middleware('can:member_checkout,project');
     });
-
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';

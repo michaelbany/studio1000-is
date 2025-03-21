@@ -47,7 +47,7 @@ const submit = () => {
 
                 <div class="grid gap-2">
                     <Label for="description">Description</Label>
-                    <Textarea v-model="form.description" id="description" class="mt-1 block w-full" required placeholder="Project Description" />
+                    <Textarea rows="15" v-model="form.description" id="description" class="mt-1 block w-full" required placeholder="Project Description" />
                     <InputError class="mt-2" :message="form.errors.description" />
                 </div>
 

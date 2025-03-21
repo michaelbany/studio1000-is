@@ -48,7 +48,7 @@ const page = computed(() => usePage().props as any);
                 <div class="flex flex-col items-start justify-between rounded-lg p-5 sm:flex-row">
                     <div>
                         <h1 class="text-4xl font-semibold leading-tight">{{ page.project?.name }}</h1>
-                        <p class="mt-3 leading-8 text-gray-500">{{ page.project?.description }}</p>
+                        <p class="mt-3 leading-8 text-gray-500 whitespace-pre-wrap">{{ page.project?.description }}</p>
                     </div>
                     <div class="mt-3 flex items-center gap-3">
                         <Can permission="project:update">
@@ -93,9 +93,9 @@ const page = computed(() => usePage().props as any);
 
             <Separator />
 
-            <div v-if="page.project.members && page.project.members.length">
+            <div v-if="page.members && page.members.length">
                 <div
-                    v-for="member in page.project.members"
+                    v-for="member in page.members"
                     :key="member.id"
                     class="flex items-center justify-between rounded-lg p-4 transition-colors hover:bg-stone-100 dark:hover:bg-stone-900"
                 >
@@ -128,7 +128,7 @@ const page = computed(() => usePage().props as any);
             </div>
 
             <div v-else>
-                <p class="text-center text-gray-500">No members</p>
+                <p class="text-center mt-4 text-gray-500">No members</p>
             </div>
         </div>
     </AppLayout>

@@ -29,15 +29,15 @@ const submit = () => {
 </script>
 
 <template>
-    <Head title="Create Project" />
+    <Head title="Edit Project" />
     <AppLayout>
         <div class="flex flex-col gap-4 rounded-xl p-4">
             <div class="relative min-h-[100vh] flex-1 rounded-xl dark:border-sidebar-border md:min-h-min">
                 <div class="flex flex-col justify-between rounded-lg p-5 sm:flex-row">
                     <div>
-                        <h1 class="text-4xl font-semibold leading-tight">Create Project</h1>
+                        <h1 class="text-4xl font-semibold leading-tight">Edit Project</h1>
 
-                        <p class="leading-8 text-gray-500">Create a new project</p>
+                        <p class="leading-8 text-gray-500">Edit the <span class="font-medium">{{ page.project?.name }}</span> project</p>
                     </div>
                 </div>
             </div>
@@ -51,7 +51,7 @@ const submit = () => {
 
                 <div class="grid gap-2">
                     <Label for="description">Description</Label>
-                    <Textarea v-model="form.description" id="description" class="mt-1 block w-full" required placeholder="Project Description" />
+                    <Textarea rows="15" v-model="form.description" id="description" class="mt-1 block w-full" required placeholder="Project Description" />
                     <InputError class="mt-2" :message="form.errors.description" />
                 </div>
 

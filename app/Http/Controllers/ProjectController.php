@@ -15,12 +15,15 @@ class ProjectController extends Controller
     public function show(Project $project)
     {
         return inertia('Projects/Show', [
-            'project' => $project->load('members'),
+            'project' => $project,
+            'members' => $project->members
+                ->filter(fn($member) => Gate::allows('view', $member->membership))
+                ->sortBy(fn($member) => $member->membership->role)
+                ->values(),
             'roles' => ProjectRolesEnum::cases(),
             'process' => StatusEnum::cases(),
         ]);
     }
-
 
     public function create()
     {
@@ -32,7 +35,7 @@ class ProjectController extends Controller
     public function store(Request $request)
     {
         Gate::authorize('create', Project::class);
-        
+
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
@@ -47,7 +50,7 @@ class ProjectController extends Controller
             'role' => ProjectRolesEnum::OWNER,
         ]);
 
-        if ($request->filled('join_as')) {
+        if ($request->filled('join_as') && $request->input('join_as') !== ProjectRolesEnum::OWNER->value) {
             $project->members()->attach($user->id, [
                 'role' => $request->join_as,
                 'status' => StatusEnum::APPROVED,

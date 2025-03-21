@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\ProjectRolesEnum;
+use App\Enums\RolesEnum;
 use App\Enums\StatusEnum;
 use App\Models\Project;
 use App\Models\ProjectMember;
@@ -39,9 +40,11 @@ class ProjectMemberController extends Controller
             ]);
         }
 
+        $status = $user->role === RolesEnum::ADMIN || $project->owners()->contains($user) ? StatusEnum::APPROVED : StatusEnum::PENDING;
+
         $project->members()->attach($user->id, [
             'role' => $role,
-            'status' => 'pending',
+            'status' => $status,
         ]);
 
         return redirect()->route('project.show', $project);
