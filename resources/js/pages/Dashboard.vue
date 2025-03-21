@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Can from '@/components/Can.vue';
 import Button from '@/components/ui/button/Button.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { ellipsis } from '@/lib/helpers';
@@ -30,10 +31,12 @@ const projects = usePage().props.projects as any;
                     </div>
 
                     <div class="flex flex-wrap items-center gap-3 pt-3 sm:pt-0">
-                        <Button :as="Link" href="/project/create">
-                            <component :is="Plus" class="size-5" />
-                            Create project
-                        </Button>
+                        <Can permission="project:create">
+                            <Button :as="Link" href="/project/create">
+                                <component :is="Plus" class="size-5" />
+                                Create project
+                            </Button>
+                        </Can>
                     </div>
                 </div>
             </div>

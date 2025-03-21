@@ -17,6 +17,7 @@ class ProjectController extends Controller
         return inertia('Projects/Show', [
             'project' => $project->load('members'),
             'roles' => ProjectRolesEnum::cases(),
+            'process' => StatusEnum::cases(),
         ]);
     }
 
@@ -30,7 +31,7 @@ class ProjectController extends Controller
 
     public function store(Request $request)
     {
-        Gate::auhtorize('create', Project::class);
+        Gate::authorize('create', Project::class);
         
         $request->validate([
             'name' => ['required', 'string', 'max:255'],

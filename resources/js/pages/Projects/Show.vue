@@ -10,8 +10,8 @@ import { Separator } from '@/components/ui/separator';
 import { can } from '@/composables/usePermissions';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { label, statusColor } from '@/lib/helpers';
-import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
-import { Edit, Edit2, User, UserPlus2 } from 'lucide-vue-next';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
+import { Edit, User, UserPlus2 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 const form = useForm({
@@ -19,7 +19,7 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route('project.member.store', page.value.project.id), {
+    form.post(route('project.member.join', page.value.project.id), {
         preserveScroll: true,
         errorBag: 'joinProject',
         onSuccess: () => {
@@ -28,6 +28,13 @@ const submit = () => {
         },
     });
 };
+
+const handleChangeStatus = (value: any) => {
+    if (!value || value.split('-').length !== 2) return;
+    router.patch(route('project.member.checkout', [page.value.project?.id , value.split('-')[1]]), {
+        status: value.split('-')[0],
+    });
+}
 
 const modal = ref(false);
 const page = computed(() => usePage().props as any);
@@ -38,12 +45,12 @@ const page = computed(() => usePage().props as any);
     <AppLayout>
         <div class="flex flex-col gap-4 rounded-xl p-4">
             <div class="relative flex-1 rounded-xl dark:border-sidebar-border md:min-h-min">
-                <div class="flex flex-col justify-between items-start rounded-lg p-5 sm:flex-row">
+                <div class="flex flex-col items-start justify-between rounded-lg p-5 sm:flex-row">
                     <div>
                         <h1 class="text-4xl font-semibold leading-tight">{{ page.project?.name }}</h1>
-                        <p class="leading-8 text-gray-500 mt-3">{{ page.project?.description }}</p>
+                        <p class="mt-3 leading-8 text-gray-500">{{ page.project?.description }}</p>
                     </div>
-                    <div class="flex items-center gap-3 mt-3">
+                    <div class="mt-3 flex items-center gap-3">
                         <Can permission="project:update">
                             <Button :as="Link" size="icon" variant="ghost" :href="`/project/${page.project.id}/edit`">
                                 <component :is="Edit" class="size-5" />
@@ -59,12 +66,10 @@ const page = computed(() => usePage().props as any);
                             <DialogContent class="sm:max-w-[425px]">
                                 <DialogHeader>
                                     <DialogTitle>Join project</DialogTitle>
-                                    <DialogDescription> 
-                                        We are excited to have you on board. Please select a role to join us as.    
-                                    </DialogDescription>
+                                    <DialogDescription> We are excited to have you on board. Please select a role to join us as. </DialogDescription>
                                 </DialogHeader>
                                 <form @submit.prevent="submit" class="space-y-6">
-                                    <div class="grid gap-2 mt-2">
+                                    <div class="mt-2 grid gap-2">
                                         <Label for="join_as">Join As</Label>
                                         <Select v-model="form.role" id="join_as" class="mt-1 block">
                                             <SelectTrigger class="">
@@ -103,7 +108,22 @@ const page = computed(() => usePage().props as any);
                         <component :is="User" class="size-5" />
                         <span>{{ label(member.membership.role) }}</span>
                     </div>
-                    <Badge :class="statusColor(member.membership.status)">{{ label(member.membership.status) }}</Badge>
+
+                    <Can :permission="page.auth.user.id === member.id && member.membership.role === 'owner' ? false : 'project:member_checkout'">
+                        <Select @update:model-value="handleChangeStatus" id="status" class="mt-1 block">
+                            <SelectTrigger class="w-min">
+                                <Badge :class="statusColor(member.membership.status)">{{ label(member.membership.status) }}</Badge>
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem hide-indicator class="pl-2" v-for="(process, i) in page.process" :key="i" :value="`${process}-${member.membership.id}`"> 
+                                    <Badge :class="statusColor(process)">{{ label(process) }}</Badge>
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <template #else>
+                            <Badge :class="statusColor(member.membership.status)">{{ label(member.membership.status) }}</Badge>
+                        </template>
+                    </Can>
                 </div>
             </div>
 

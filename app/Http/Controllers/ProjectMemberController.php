@@ -3,15 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Enums\ProjectRolesEnum;
+use App\Enums\StatusEnum;
 use App\Models\Project;
+use App\Models\ProjectMember;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class ProjectMemberController extends Controller
 {
-    public function store(Request $request, Project $project)
+    public function join(Request $request, Project $project)
     {
         $request->validate([
             'role' => ['required', Rule::enum(ProjectRolesEnum::class)],
@@ -40,6 +43,29 @@ class ProjectMemberController extends Controller
             'role' => $role,
             'status' => 'pending',
         ]);
+
+        return redirect()->route('project.show', $project);
+    }
+
+
+    public function checkout(Request $request, Project $project, ProjectMember $member)
+    {
+        Gate::authorize('member_checkout', $project);
+
+        $request->validate([
+            'status' => ['required', Rule::enum(StatusEnum::class)],
+        ]);
+
+        if ($request->input('status') === StatusEnum::APPROVED->value) {
+            $member->approve();
+        } elseif ($request->input('status') === StatusEnum::REJECTED->value) {
+            $member->reject();
+        } else {
+            $member->update([
+                'status' => StatusEnum::PENDING,
+                'approved_at' => NULL,
+            ]);
+        }
 
         return redirect()->route('project.show', $project);
     }

@@ -6,6 +6,7 @@ use App\Enums\ProjectRolesEnum;
 use App\Enums\ProjectStatusEnum;
 use App\Enums\RolesEnum;
 use App\Models\Project;
+use App\Models\ProjectMember;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
@@ -56,7 +57,7 @@ class ProjectPolicy
      */
     public function join(User $user, Project $project): bool
     {
-        return $project->status === ProjectStatusEnum::OPEN;
+        return $project->status === ProjectStatusEnum::OPEN || $project->owners()->contains($user) || $user->role === RolesEnum::ADMIN;
     }
 
     /**
@@ -67,7 +68,7 @@ class ProjectPolicy
         return ! $project->owners()->contains($user);
     }
 
-    public function member_confirm(User $user, Project $project): bool
+    public function member_checkout(User $user, Project $project): bool
     {
         return $user->role === RolesEnum::ADMIN || $project->owners()->contains($user);
     }

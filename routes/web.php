@@ -3,6 +3,8 @@
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectMemberController;
 use App\Models\Project;
+use App\Models\ProjectMember;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -26,9 +28,10 @@ Route::group(['prefix' => 'project'], function () {
     Route::delete('/{project}', [ProjectController::class, 'destroy'])->name('project.destroy');
 
     Route::group(['prefix' => '{project}/member'], function () {
-        Route::post('/', [ProjectMemberController::class, 'store'])->name('project.member.store');
-        Route::put('/{member}', [ProjectMemberController::class, 'update'])->name('project.member.update');
+        Route::post('/', [ProjectMemberController::class, 'join'])->name('project.member.join');
         Route::delete('/{member}', [ProjectMemberController::class, 'destroy'])->name('project.member.destroy');
+
+        Route::patch('/{member}/checkout', [ProjectMemberController::class, 'checkout'])->name('project.member.checkout')->middleware('can:member_checkout,project');
     });
 
 });

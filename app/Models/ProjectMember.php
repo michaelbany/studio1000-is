@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 class ProjectMember extends Pivot
 {
     protected $fillable = ['role', 'status', 'approved_at'];
+    protected $table = 'project_members';
 
     protected $casts = [
         'approved_at' => 'datetime',
