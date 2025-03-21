@@ -33,9 +33,6 @@ const page = computed(() => usePage().props as any);
 
 <template>
     <Head :title="page.project?.name" />
-    <pre>
-        {{ page.project.members.length }}
-    </pre>
     <AppLayout>
         <div class="flex flex-col gap-4 rounded-xl p-4">
             <div class="relative min-h-[100vh] flex-1 rounded-xl dark:border-sidebar-border md:min-h-min">
