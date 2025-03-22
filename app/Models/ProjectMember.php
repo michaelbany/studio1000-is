@@ -28,18 +28,58 @@ class ProjectMember extends Pivot
         return $this->belongsTo(User::class);
     }
 
-    public function approve(): void
+    public function approve()
     {
-        $this->update([
-            'status' => MembersStatusEnum::APPROVED,
-            'approved_at' => Carbon::now(),
-        ]);
+        $slot = $this->project->slots()->where('role', $this->role)->first();
+
+        if ($slot) {
+            $slot->update([
+                'user_id' => $this->user_id,
+                'status' => MembersStatusEnum::APPROVED,
+                'approved_at' => Carbon::now(),
+            ]);
+
+            ProjectMember::where('project_id', $this->project_id)
+                ->where('role', $this->role)
+                ->where('status', MembersStatusEnum::PENDING)
+                ->where('id', '!=', $this->id)
+                ->get()->each->reject();
+
+            $this->delete();
+        } else {
+
+            return redirect()->back()->withErrors([
+                'checkout' => 'No slots available for this role.',
+            ]);
+        }
     }
 
     public function reject(): void
     {
+        if ($this->status === MembersStatusEnum::APPROVED) {
+            $slot = $this->makeEmpty($this->project);
+            $slot->role = $this->role;
+            $slot->label = $this->label;
+            $slot->save();
+        }
+
         $this->update([
             'status' => MembersStatusEnum::REJECTED,
+            'approved_at' => NULL,
+        ]);
+    }
+
+    public function pending(): void
+    {
+        if ($this->status === MembersStatusEnum::APPROVED) {
+            $slot = $this->makeEmpty($this->project);
+            $slot->role = $this->role;
+            $slot->label = $this->label;
+            $slot->save();
+        }
+
+        $this->update([
+            'status' => MembersStatusEnum::PENDING,
             'approved_at' => NULL,
         ]);
     }

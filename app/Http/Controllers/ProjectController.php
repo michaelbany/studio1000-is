@@ -42,6 +42,9 @@ class ProjectController extends Controller
         return redirect()->route('project.summary', $project);
     }
 
+    /**
+     * @deprecated
+     */
     public function create()
     {
         return inertia('Projects/Create', [
@@ -78,6 +81,9 @@ class ProjectController extends Controller
         return redirect()->route('project.summary', $project);
     }
 
+    /**
+     * @deprecated
+     */
     public function edit(Project $project)
     {
         return inertia('Projects/Edit', [

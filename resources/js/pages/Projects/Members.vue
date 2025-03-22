@@ -40,6 +40,22 @@ const page = computed<any>(() => usePage().props);
 const slotModal = ref(false);
 const slotEditModal = ref(false);
 
+const roleOrder = [
+    'director',
+    'writer',
+    'producer',
+    'camera_operator',
+    'lighting_technician',
+    'set_designer',
+    'makeup_artist',
+    'costume_designer',
+    'actor',
+    'editor',
+    'vfx_supervisor',
+    'sound_engineer',
+    'owner',
+];
+
 const slotForm = useForm({
     role: '',
     label: '',
@@ -49,9 +65,11 @@ const slotForm = useForm({
 const slotEditForm = useForm<{
     label: string;
     id: number | string;
+    role: string;
     user: any;
 }>({
     label: '',
+    role: '',
     id: '',
     user: '',
 });
@@ -83,6 +101,24 @@ const submitEditSlot = (update?: boolean | undefined) => {
     }
 };
 
+const submitCheckout = (value: any) => {
+    if (!value || value.split('-').length !== 2) return;
+    router.post(
+        route('project.members.checkout', [page.value.project?.id, value.split('-')[1]]),
+        {
+            status: value.split('-')[0],
+        },
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                if (page.value.errors.checkout) {
+                    toast.error(page.value.errors.checkout);
+                }
+            },
+        },
+    );
+};
+
 const submitApply = (slot: any) => {
     router.post(
         route('project.members.apply', [page.value.project.id, slot.id]),
@@ -102,25 +138,34 @@ const handleEditSlot = (slot: any) => {
     if (!can('project:update')) {
         return;
     }
+    
     slotEditForm.label = slot.label;
     slotEditForm.id = slot.id;
+    slotEditForm.role = slot.role;
     slotEditForm.user = slot.user_id;
     slotEditModal.value = true;
 };
 
 const membership = computed(() => {
-    const ms = page.value.members.map((member: any) => {
-        const { membership, ...user } = member;
-        return {
-            ...membership,
-            user_id: user,
-        };
-    });
-    ms.push(...page.value.slots);
-    return ms;
+    const sorted = page.value.members
+        .map((member: any) => {
+            const { membership, ...user } = member;
+            return {
+                ...membership,
+                user_id: user,
+            };
+        })
+        .sort((a:any, b:any) => {
+            const nameA = a.user_id?.name?.toLowerCase() ?? '';
+            const nameB = b.user_id?.name?.toLowerCase() ?? '';
+            return nameA.localeCompare(nameB);
+        });
+    sorted.push(...page.value.slots);
+
+    return sorted;
 });
 
-const groups = computed<Record<string, any>>(() => {
+const unorderedGroups = computed<Record<string, any>>(() => {
     return membership.value.reduce((acc: any, slot: any) => {
         if (!acc[slot.role]) {
             acc[slot.role] = [];
@@ -130,6 +175,27 @@ const groups = computed<Record<string, any>>(() => {
 
         return acc;
     }, {});
+});
+
+const groups = computed<Record<string, any>>(() => {
+    const unordered = unorderedGroups.value;
+
+    return Object.fromEntries(
+        Object.entries(unordered).sort(([a], [b]) => {
+            const weightA = roleOrder.indexOf(a);
+            const weightB = roleOrder.indexOf(b);
+
+            const aWeight = weightA === -1 ? 999 : weightA;
+            const bWeight = weightB === -1 ? 999 : weightB;
+
+            if (aWeight !== bWeight) {
+                return aWeight - bWeight;
+            }
+
+            // Pokud mají stejnou váhu (obě nejsou v seznamu), řaď abecedně
+            return a.localeCompare(b);
+        }),
+    );
 });
 </script>
 
@@ -184,9 +250,35 @@ const groups = computed<Record<string, any>>(() => {
                                     </div>
                                 </div>
 
-                                <Badge v-if="member.user_id" :class="statusColor(member.status)">
-                                    {{ label(member.status) }}
-                                </Badge>
+                                <template v-if="member.user_id">
+                                    <Can
+                                        :permission="
+                                            (page.auth.user.id === member.user_id.id && member.role === 'owner') || member.user_id.role === 'admin'
+                                                ? false
+                                                : 'project:member_checkout'
+                                        "
+                                    >
+                                        <Select @update:model-value="submitCheckout" id="status" class="mt-1 block">
+                                            <SelectTrigger class="w-min">
+                                                <Badge :class="statusColor(member.status)">{{ label(member.status) }}</Badge>
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem
+                                                    hide-indicator
+                                                    class="pl-2"
+                                                    v-for="(member_status, i) in page.enum.member_status"
+                                                    :key="i"
+                                                    :value="`${member_status}-${member.id}`"
+                                                >
+                                                    <Badge :class="statusColor(member_status)">{{ label(member_status) }}</Badge>
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <template #else>
+                                            <Badge :class="statusColor(member.status)">{{ label(member.status) }}</Badge>
+                                        </template>
+                                    </Can>
+                                </template>
 
                                 <Button v-else variant="ghost" :disabled="!can('project:join')" size="sm" @click.stop="() => submitApply(member)">
                                     <component :is="UserPlus2" class="size-5" />
@@ -196,60 +288,6 @@ const groups = computed<Record<string, any>>(() => {
                         </div>
                     </CollapsibleContent>
                 </Collapsible>
-
-                <!-- <pre>
-                    {{ groups }}
-                </pre> -->
-
-                <!-- <div v-if="page.members && page.members.length">
-                    <div
-                        v-for="member in page.members"
-                        :key="member.id"
-                        class="flex items-center justify-between rounded-lg p-4 transition-colors hover:bg-stone-100 dark:hover:bg-stone-900"
-                    >
-                        <div>
-                            <p class="font-semibold" :class="member.id === page.auth.user.id ? 'text-red-500' : ''">{{ member.name }}</p>
-                            <p class="text-sm text-gray-500">{{ member.email }}</p>
-                        </div>
-
-                        <div class="flex items-center gap-2">
-                            <component :is="User" class="size-5" />
-                            <span>{{ label(member.membership.role) }}</span>
-                        </div>
-
-                        <Can
-                            :permission="
-                                (page.auth.user.id === member.id && member.membership.role === 'owner') || member.role === 'admin'
-                                    ? false
-                                    : 'project:member_checkout'
-                            "
-                        >
-                            <Select @update:model-value="handleChangeStatus" id="status" class="mt-1 block">
-                                <SelectTrigger class="w-min">
-                                    <Badge :class="statusColor(member.membership.status)">{{ label(member.membership.status) }}</Badge>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem
-                                        hide-indicator
-                                        class="pl-2"
-                                        v-for="(process, i) in page.process"
-                                        :key="i"
-                                        :value="`${process}-${member.membership.id}`"
-                                    >
-                                        <Badge :class="statusColor(process)">{{ label(process) }}</Badge>
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <template #else>
-                                <Badge :class="statusColor(member.membership.status)">{{ label(member.membership.status) }}</Badge>
-                            </template>
-                        </Can>
-                    </div>
-                </div> -->
-
-                <!-- <div v-else>
-                    <p class="text-sm text-muted-foreground">No members found.</p>
-                </div> -->
             </div>
 
             <Dialog v-model:open="slotModal">
@@ -318,12 +356,12 @@ const groups = computed<Record<string, any>>(() => {
                                     variant="destructive"
                                     :disabled="
                                         slotForm.processing ||
-                                        (page.auth.user.id === slotEditForm.user?.id && slotForm.role === 'owner') ||
+                                        (page.auth.user.id === slotEditForm.user?.id && slotEditForm.role === 'owner') ||
                                         slotEditForm.user?.role === 'admin'
                                     "
                                     @click="submitEditSlot(false)"
                                 >
-                                    Delete
+                                    {{ slotEditForm.user?.id ? 'Clear slot' : 'Delete' }}
                                 </Button>
                                 <Button type="submit" :disabled="slotForm.processing"> Save </Button>
                             </div>

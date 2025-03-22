@@ -22,7 +22,9 @@ class ProjectMemberController extends Controller
 
         return Inertia::render('Projects/Members', [
             'project' => $project,
-            'members' => $project->members,
+            'members' => $project->members
+                ->filter(fn($project) => Gate::allows('view', $project->membership))
+                ->values(),
             // 'members' => $project->members
             //     ->filter(fn($project) => Gate::allows('view', $project->membership))
             //     ->sortBy(fn($project) => $project->membership->role)
@@ -30,7 +32,7 @@ class ProjectMemberController extends Controller
             'slots' => $project->slots,
             'enum' => [
                 'member_role' => ProjectRolesEnum::cases(),
-                'member_status' => MembersStatusEnum::cases(),
+                'member_status' => MembersStatusEnum::array(),
             ],
         ]);
     }
@@ -74,7 +76,11 @@ class ProjectMemberController extends Controller
     {
         Gate::authorize('member_delete', $project);
         
-        $member->delete();
+        if ($member->status === MembersStatusEnum::APPROVED) {
+            $member->empty();
+        } else {
+            $member->delete();
+        }
 
         return redirect()->back();
     }
@@ -112,48 +118,6 @@ class ProjectMemberController extends Controller
         return redirect()->back();
     }
 
-
-    /**
-     * @deprecated
-     */
-    public function join(Request $request, Project $project)
-    {
-        $request->validate([
-            'role' => ['required', Rule::enum(ProjectRolesEnum::class)],
-        ]);
-
-        $user = $request->user();
-        $role = $request->input('role');
-
-        $roleExists = $project->members()->where('user_id', $user->id)->wherePivot('role', $role)->exists();
-
-        if ($roleExists) {
-            return redirect()->route('project.show', $project)->withErrors([
-                'role' => 'You already have this role in the project.',
-            ]);
-        }
-
-        $pendingRequests = $project->members()->where('user_id', $user->id)->wherePivot('status', 'pending')->count();
-
-        if ($pendingRequests >= 3) {
-            return redirect()->route('project.show', $project)->withErrors([
-                'role' => 'You already have 3 or more pending requests.',
-            ]);
-        }
-
-        $status = $user->role === RolesEnum::ADMIN || $project->owners()->contains($user) ? MembersStatusEnum::APPROVED : MembersStatusEnum::PENDING;
-
-        $project->members()->attach($user->id, [
-            'role' => $role,
-            'status' => $status,
-        ]);
-
-        return redirect()->route('project.show', $project);
-    }
-
-    /**
-     * @deprecated
-     */
     public function checkout(Request $request, Project $project, ProjectMember $member)
     {
         Gate::authorize('member_checkout', $project);
@@ -167,12 +131,9 @@ class ProjectMemberController extends Controller
         } elseif ($request->input('status') === MembersStatusEnum::REJECTED->value) {
             $member->reject();
         } else {
-            $member->update([
-                'status' => MembersStatusEnum::PENDING,
-                'approved_at' => NULL,
-            ]);
+            $member->pending();
         }
 
-        return redirect()->route('project.show', $project);
+        return redirect()->back();
     }
 }

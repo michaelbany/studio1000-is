@@ -27,6 +27,7 @@ Route::group(['prefix' => 'project'], function () {
     Route::put('/{project}/members/{member}', [ProjectMemberController::class, 'update'])->name('project.members.update');
     Route::delete('/{project}/members/{member}', [ProjectMemberController::class, 'destroy'])->name('project.members.destroy');
     Route::post('/{project}/members/{member}/apply', [ProjectMemberController::class, 'apply'])->name('project.members.apply');
+    Route::post('/{project}/members/{member}/checkout', [ProjectMemberController::class, 'checkout'])->name('project.members.checkout');
 
 });
 
