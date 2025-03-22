@@ -4,6 +4,9 @@ import HeadingSmall from '@/components/HeadingSmall.vue';
 import InputError from '@/components/InputError.vue';
 import Badge from '@/components/ui/badge/Badge.vue';
 import Button from '@/components/ui/button/Button.vue';
+import Collapsible from '@/components/ui/collapsible/Collapsible.vue';
+import CollapsibleContent from '@/components/ui/collapsible/CollapsibleContent.vue';
+import CollapsibleTrigger from '@/components/ui/collapsible/CollapsibleTrigger.vue';
 import Dialog from '@/components/ui/dialog/Dialog.vue';
 import DialogContent from '@/components/ui/dialog/DialogContent.vue';
 import DialogDescription from '@/components/ui/dialog/DialogDescription.vue';
@@ -22,25 +25,34 @@ import SelectContent from '@/components/ui/select/SelectContent.vue';
 import SelectItem from '@/components/ui/select/SelectItem.vue';
 import SelectTrigger from '@/components/ui/select/SelectTrigger.vue';
 import SelectValue from '@/components/ui/select/SelectValue.vue';
+import Separator from '@/components/ui/separator/Separator.vue';
+import { can } from '@/composables/usePermissions';
 import AppLayout from '@/layouts/AppLayout.vue';
 import ProjectLayout from '@/layouts/project/Layout.vue';
 import { label, statusColor } from '@/lib/helpers';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
-import { Plus, User } from 'lucide-vue-next';
+import { ChevronsDownUp, Plus, UserPlus2 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 const page = computed<any>(() => usePage().props);
 
 const slotModal = ref(false);
-
-const handleChangeStatus = (value: any) => {
-    //
-};
+const slotEditModal = ref(false);
 
 const slotForm = useForm({
     role: '',
     label: '',
     count: 1,
+});
+
+const slotEditForm = useForm<{
+    label: string;
+    id: number | string;
+    user: any;
+}>({
+    label: '',
+    id: '',
+    user: '',
 });
 
 const submitSlot = () => {
@@ -51,6 +63,58 @@ const submitSlot = () => {
         },
     });
 };
+
+const submitEditSlot = (update?: boolean | undefined) => {
+    if (update) {
+        slotEditForm.put(route('project.members.update', [page.value.project.id, slotEditForm.id]), {
+            preserveScroll: true,
+            onSuccess: () => {
+                slotEditModal.value = false;
+            },
+        });
+    } else {
+        slotEditForm.delete(route('project.members.destroy', [page.value.project.id, slotEditForm.id]), {
+            preserveScroll: true,
+            onSuccess: () => {
+                slotEditModal.value = false;
+            },
+        });
+    }
+};
+
+const handleEditSlot = (slot: any) => {
+    if (!can('project:update')) {
+        return;
+    }
+    slotEditForm.label = slot.label;
+    slotEditForm.id = slot.id;
+    slotEditForm.user = slot.user_id;
+    slotEditModal.value = true;
+};
+
+const membership = computed(() => {
+    const ms = page.value.members.map((member: any) => {
+        const { membership, ...user } = member;
+        return {
+            ...membership,
+            user_id: user,
+        };
+    });
+    ms.push(...page.value.slots);
+    return ms;
+});
+
+const groups = computed<Record<string, any>>(() => {
+    return membership.value.reduce((acc: any, slot: any) => {
+        if (!acc[slot.role]) {
+            acc[slot.role] = [];
+        }
+
+        acc[slot.role].push(slot);
+
+        return acc;
+    }, {});
+});
 </script>
 
 <template>
@@ -67,11 +131,58 @@ const submitSlot = () => {
                         </Button>
                     </Can>
                 </div>
-                <pre>
-                    {{ page.slots }}
-                </pre>
 
-                <div v-if="page.members && page.members.length">
+                <Separator />
+
+                <Collapsible default-open class="space-y-2" v-for="(group, role) in groups" :key="role">
+                    <div class="flex items-center justify-between space-x-4">
+                        <h4 class="text-sm font-semibold">{{ label(role) }}s</h4>
+                        <CollapsibleTrigger as-child>
+                            <Button variant="ghost" size="sm" class="w-9 p-0">
+                                <component :is="ChevronsDownUp" class="h-4 w-4" />
+                                <span class="sr-only">Toggle</span>
+                            </Button>
+                        </CollapsibleTrigger>
+                    </div>
+
+                    <CollapsibleContent class="relative space-y-2">
+                        <div
+                            v-for="(member, i) in group"
+                            :key="i"
+                            @click="() => handleEditSlot(member)"
+                            :class="can('project:update') ? 'cursor-pointer' : ''"
+                            class="rounded-md border px-4 py-3 text-sm transition-colors hover:border-muted"
+                        >
+                            <div class="flex items-center justify-between">
+                                <div class="flex flex-col gap-2">
+                                    <span class="text-xs font-medium text-muted-foreground">
+                                        {{ member.label || 'Untitled' }}
+                                    </span>
+                                    <Separator orientation="horizontal" class="w-[100px]" />
+                                    <div v-if="member.user_id">
+                                        <p class="font-semibold">{{ member.user_id.name }}</p>
+                                        <p class="text-xs text-gray-500">{{ member.user_id.email }}</p>
+                                    </div>
+                                    <div v-else>
+                                        <p class="italic">Still available</p>
+                                    </div>
+                                </div>
+
+                                <Badge v-if="member.user_id" :class="statusColor(member.status)">{{ label(member.status) }}</Badge>
+                                <Button v-else variant="ghost" :disabled="!can('project:join')" size="sm" @click.stop>
+                                    <component :is="UserPlus2" class="size-5" />
+                                    Apply
+                                </Button>
+                            </div>
+                        </div>
+                    </CollapsibleContent>
+                </Collapsible>
+
+                <!-- <pre>
+                    {{ groups }}
+                </pre> -->
+
+                <!-- <div v-if="page.members && page.members.length">
                     <div
                         v-for="member in page.members"
                         :key="member.id"
@@ -115,17 +226,17 @@ const submitSlot = () => {
                             </template>
                         </Can>
                     </div>
-                </div>
+                </div> -->
 
-                <div v-else>
+                <!-- <div v-else>
                     <p class="text-sm text-muted-foreground">No members found.</p>
-                </div>
+                </div> -->
             </div>
 
             <Dialog v-model:open="slotModal">
                 <DialogContent class="sm:max-w-[425px]">
                     <DialogHeader>
-                        <DialogTitle>Create member slot</DialogTitle>
+                        <DialogTitle>Create a member slot</DialogTitle>
                         <DialogDescription> Create a new member slot for this project. You can create multiple at once. </DialogDescription>
                     </DialogHeader>
                     <form @submit.prevent="submitSlot" class="space-y-6">
@@ -161,6 +272,40 @@ const submitSlot = () => {
                                         <NumberFieldIncrement />
                                     </NumberFieldContent>
                                 </NumberField>
+                                <Button type="submit" :disabled="slotForm.processing"> Save </Button>
+                            </div>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog v-model:open="slotEditModal">
+                <DialogContent class="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Edit member slot</DialogTitle>
+                        <DialogDescription> Edit a member slot for this project. </DialogDescription>
+                    </DialogHeader>
+                    <form @submit.prevent="submitEditSlot(true)" class="space-y-6">
+                        <div class="mt-2 grid gap-2">
+                            <Label for="label">Label</Label>
+                            <Input v-model="slotEditForm.label" id="label" class="mt-1 block w-full" placeholder="e.g. Big Scary Wolf" />
+                            <InputError class="mt-2" :message="slotEditForm.errors.label" />
+                        </div>
+
+                        <DialogFooter>
+                            <div class="flex w-full items-center justify-between">
+                                <Button
+                                    type="button"
+                                    variant="destructive"
+                                    :disabled="
+                                        slotForm.processing ||
+                                        (page.auth.user.id === slotEditForm.user?.id && slotForm.role === 'owner') ||
+                                        slotEditForm.user?.role === 'admin'
+                                    "
+                                    @click="submitEditSlot(false)"
+                                >
+                                    Delete
+                                </Button>
                                 <Button type="submit" :disabled="slotForm.processing"> Save </Button>
                             </div>
                         </DialogFooter>

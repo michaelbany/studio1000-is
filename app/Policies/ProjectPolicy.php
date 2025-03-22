@@ -85,11 +85,11 @@ class ProjectPolicy
 
     public function member_update(User $user, Project $project): bool
     {
-        return $user->role === RolesEnum::ADMIN;
+        return $user->role === RolesEnum::ADMIN || $project->owners()->contains($user);
     }
 
     public function member_delete(User $user, Project $project): bool
     {
-        return $user->role === RolesEnum::ADMIN;
+        return $user->role === RolesEnum::ADMIN || $project->owners()->contains($user);
     }
 }

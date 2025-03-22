@@ -22,10 +22,11 @@ class ProjectMemberController extends Controller
 
         return Inertia::render('Projects/Members', [
             'project' => $project,
-            'members' => $project->members
-                ->filter(fn($project) => Gate::allows('view', $project->membership))
-                ->sortBy(fn($project) => $project->membership->role)
-                ->values(),
+            'members' => $project->members,
+            // 'members' => $project->members
+            //     ->filter(fn($project) => Gate::allows('view', $project->membership))
+            //     ->sortBy(fn($project) => $project->membership->role)
+            //     ->values(),
             'slots' => $project->slots,
             'enum' => [
                 'member_role' => ProjectRolesEnum::cases(),
@@ -55,6 +56,28 @@ class ProjectMemberController extends Controller
         return redirect()->back();
     }
 
+
+    public function update(Request $request, Project $project, ProjectMember $member)
+    {
+        Gate::authorize('update', $project);
+
+        $request->validate([
+            'label' => ['nullable', 'string', 'max:50'],
+        ]);
+
+        $member->update($request->only('label'));
+
+        return redirect()->back();
+    }
+
+    public function destroy(Project $project, ProjectMember $member)
+    {
+        Gate::authorize('member_delete', $project);
+        
+        $member->delete();
+
+        return redirect()->back();
+    }
 
     public function join(Request $request, Project $project)
     {

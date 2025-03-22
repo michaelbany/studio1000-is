@@ -24,7 +24,8 @@ Route::group(['prefix' => 'project'], function () {
     Route::patch('/{project}', [ProjectController::class, 'update'])->name('project.update');
 
     Route::post('/{project}/members', [ProjectMemberController::class, 'store'])->name('project.members.store');
-
+    Route::put('/{project}/members/{member}', [ProjectMemberController::class, 'update'])->name('project.members.update');
+    Route::delete('/{project}/members/{member}', [ProjectMemberController::class, 'destroy'])->name('project.members.destroy');
 });
 
 Route::get('/test', function () {

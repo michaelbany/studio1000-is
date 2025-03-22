@@ -34,7 +34,7 @@ const currentPath = page.value.ziggy?.location ? new URL(page.value.ziggy.locati
     <div class="px-4 py-6">
         <Heading
             :title="page.project.name"
-            description="Welcome to project workspace. Here you can explore and manage all aspects of this project in one centralized location."
+            description="Explore and manage all aspects of this project in one centralized location."
         />
 
         <div class="flex flex-col space-y-8 md:space-y-0 lg:flex-row lg:space-x-12 lg:space-y-0">
