@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('schedule_participants', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(ProjectSchedule::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(ProjectMember::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(ProjectMember::class, 'project_member_id')->constrained()->cascadeOnDelete();
             $table->time('call_time')->nullable();
             $table->time('wrap_time')->nullable();
             $table->timestamps();
