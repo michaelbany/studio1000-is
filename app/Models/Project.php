@@ -28,4 +28,14 @@ class Project extends Model
     {
         return $this->members()->wherePivot('role', ProjectRolesEnum::OWNER)->wherePivot('status', MembersStatusEnum::APPROVED, true)->get();
     }
+
+    public function locations()
+    {
+        return $this->hasMany(Location::class);
+    }
+
+    public function schedules()
+    {
+        return $this->hasMany(ProjectSchedule::class);
+    }
 }

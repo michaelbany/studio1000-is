@@ -15,6 +15,24 @@ use Inertia\Inertia;
 
 class ProjectMemberController extends Controller
 {
+    public function index(Project $project)
+    {
+        if (Gate::denies('view', $project)) {
+            abort(404);
+        }
+
+        return Inertia::render('Projects/Members', [
+            'project' => $project,
+            'members' => $project->members
+                ->filter(fn($member) => Gate::allows('view', $member->membership))
+                ->sortBy(fn($member) => $member->membership->role)
+                ->values(),
+            'roles' => ProjectRolesEnum::cases(), //todo
+            'process' => MembersStatusEnum::cases(), //todo
+        ]);
+    }
+
+
     public function join(Request $request, Project $project)
     {
         $request->validate([

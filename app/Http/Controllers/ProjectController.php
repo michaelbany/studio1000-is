@@ -20,12 +20,6 @@ class ProjectController extends Controller
 
         return inertia('Projects/Show', [
             'project' => $project,
-            'members' => $project->members
-                ->filter(fn($member) => Gate::allows('view', $member->membership))
-                ->sortBy(fn($member) => $member->membership->role)
-                ->values(),
-            'roles' => ProjectRolesEnum::cases(),
-            'process' => MembersStatusEnum::cases(),
         ]);
     }
 

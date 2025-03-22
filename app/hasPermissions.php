@@ -12,7 +12,7 @@ trait hasPermissions
         $policies = Gate::policies();
         $permissions = collect();
         $routeModels = collect($request->route()->parameters())->mapWithKeys(function ($model) {
-            if (is_string($model)) {
+            if (is_string($model) || is_numeric($model)) {
                 return [];
             }
             return [get_class($model) => $model];

@@ -10,8 +10,8 @@ defineProps<Props>();
 <template>
     <div class="mb-8 space-y-0.5">
         <h2 class="text-xl font-semibold tracking-tight">{{ title }}</h2>
-        <p v-if="description" class="text-sm text-muted-foreground">
-            {{ description }}
+        <p v-if="description || $slots" class="max-w-[600px] text-sm text-muted-foreground">
+            <slot>{{ description }}</slot>
         </p>
     </div>
 </template>

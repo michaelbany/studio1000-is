@@ -1,17 +1,9 @@
 <script setup lang="ts">
-import Can from '@/components/Can.vue';
-import InputError from '@/components/InputError.vue';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { can } from '@/composables/usePermissions';
+import Badge from '@/components/ui/badge/Badge.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
+import ProjectLayout from '@/layouts/project/Layout.vue';
 import { label, statusColor } from '@/lib/helpers';
-import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
-import { Edit, User, UserPlus2 } from 'lucide-vue-next';
+import { Head, router, useForm, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 const form = useForm({
@@ -31,10 +23,10 @@ const submit = () => {
 
 const handleChangeStatus = (value: any) => {
     if (!value || value.split('-').length !== 2) return;
-    router.patch(route('project.member.checkout', [page.value.project?.id , value.split('-')[1]]), {
+    router.patch(route('project.member.checkout', [page.value.project?.id, value.split('-')[1]]), {
         status: value.split('-')[0],
     });
-}
+};
 
 const modal = ref(false);
 const page = computed(() => usePage().props as any);
@@ -43,7 +35,17 @@ const page = computed(() => usePage().props as any);
 <template>
     <Head :title="page.project?.name" />
     <AppLayout>
-        <div class="flex flex-col gap-4 rounded-xl p-4">
+        <ProjectLayout>
+            <div class="flex flex-col space-y-6">
+                <div>
+                    <h1 class="text-4xl font-semibold leading-tight">{{ page.project?.name }}</h1>
+                    <Badge :class="statusColor(page.project?.status)" class="">{{ label(page.project?.status) }}</Badge>
+                </div>
+                <p class="mt-3 whitespace-pre-wrap leading-8 text-gray-500">{{ page.project?.description }}</p>
+            </div>
+        </ProjectLayout>
+
+        <!-- <div class="flex flex-col gap-4 rounded-xl p-4">
             <div class="relative flex-1 rounded-xl dark:border-sidebar-border md:min-h-min">
                 <div class="flex flex-col items-start justify-between rounded-lg p-5 sm:flex-row">
                     <div>
@@ -131,6 +133,6 @@ const page = computed(() => usePage().props as any);
             <div v-else>
                 <p class="text-center mt-4 text-gray-500">No members</p>
             </div>
-        </div>
+        </div> -->
     </AppLayout>
 </template>
