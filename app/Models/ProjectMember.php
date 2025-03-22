@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ProjectRolesEnum;
-use App\Enums\StatusEnum;
+use App\Enums\MembersStatusEnum;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
@@ -15,7 +15,7 @@ class ProjectMember extends Pivot
     protected $casts = [
         'approved_at' => 'datetime',
         'role' => ProjectRolesEnum::class,
-        'status' => StatusEnum::class,
+        'status' => MembersStatusEnum::class,
     ];
 
     public function project()
@@ -31,7 +31,7 @@ class ProjectMember extends Pivot
     public function approve(): void
     {
         $this->update([
-            'status' => StatusEnum::APPROVED,
+            'status' => MembersStatusEnum::APPROVED,
             'approved_at' => Carbon::now(),
         ]);
     }
@@ -39,7 +39,7 @@ class ProjectMember extends Pivot
     public function reject(): void
     {
         $this->update([
-            'status' => StatusEnum::REJECTED,
+            'status' => MembersStatusEnum::REJECTED,
             'approved_at' => NULL,
         ]);
     }

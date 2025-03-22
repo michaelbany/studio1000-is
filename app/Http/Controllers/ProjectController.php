@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\ProjectRolesEnum;
 use App\Enums\ProjectStatusEnum;
-use App\Enums\StatusEnum;
+use App\Enums\MembersStatusEnum;
 use App\Models\Project;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
@@ -25,7 +25,7 @@ class ProjectController extends Controller
                 ->sortBy(fn($member) => $member->membership->role)
                 ->values(),
             'roles' => ProjectRolesEnum::cases(),
-            'process' => StatusEnum::cases(),
+            'process' => MembersStatusEnum::cases(),
         ]);
     }
 
@@ -49,7 +49,7 @@ class ProjectController extends Controller
         $user = $request->user();
 
         $project = $user->projects()->create($request->only('name', 'description'), [
-            'status' => StatusEnum::APPROVED,
+            'status' => MembersStatusEnum::APPROVED,
             'approved_at' => now(),
             'role' => ProjectRolesEnum::OWNER,
         ]);
@@ -57,7 +57,7 @@ class ProjectController extends Controller
         if ($request->filled('join_as') && $request->input('join_as') !== ProjectRolesEnum::OWNER->value) {
             $project->members()->attach($user->id, [
                 'role' => $request->join_as,
-                'status' => StatusEnum::APPROVED,
+                'status' => MembersStatusEnum::APPROVED,
                 'approved_at' => now(),
             ]);
         }

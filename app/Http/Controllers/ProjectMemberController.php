@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\ProjectRolesEnum;
 use App\Enums\RolesEnum;
-use App\Enums\StatusEnum;
+use App\Enums\MembersStatusEnum;
 use App\Models\Project;
 use App\Models\ProjectMember;
 use App\Models\User;
@@ -40,7 +40,7 @@ class ProjectMemberController extends Controller
             ]);
         }
 
-        $status = $user->role === RolesEnum::ADMIN || $project->owners()->contains($user) ? StatusEnum::APPROVED : StatusEnum::PENDING;
+        $status = $user->role === RolesEnum::ADMIN || $project->owners()->contains($user) ? MembersStatusEnum::APPROVED : MembersStatusEnum::PENDING;
 
         $project->members()->attach($user->id, [
             'role' => $role,
@@ -56,16 +56,16 @@ class ProjectMemberController extends Controller
         Gate::authorize('member_checkout', $project);
 
         $request->validate([
-            'status' => ['required', Rule::enum(StatusEnum::class)],
+            'status' => ['required', Rule::enum(MembersStatusEnum::class)],
         ]);
 
-        if ($request->input('status') === StatusEnum::APPROVED->value) {
+        if ($request->input('status') === MembersStatusEnum::APPROVED->value) {
             $member->approve();
-        } elseif ($request->input('status') === StatusEnum::REJECTED->value) {
+        } elseif ($request->input('status') === MembersStatusEnum::REJECTED->value) {
             $member->reject();
         } else {
             $member->update([
-                'status' => StatusEnum::PENDING,
+                'status' => MembersStatusEnum::PENDING,
                 'approved_at' => NULL,
             ]);
         }

@@ -3,7 +3,7 @@
 namespace App\Policies;
 
 use App\Enums\RolesEnum;
-use App\Enums\StatusEnum;
+use App\Enums\MembersStatusEnum;
 use App\Models\ProjectMember;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
@@ -23,7 +23,7 @@ class ProjectMemberPolicy
             return true;
         }
 
-        if ($projectMember->status === StatusEnum::APPROVED) {
+        if ($projectMember->status === MembersStatusEnum::APPROVED) {
             return true;
         }
 
