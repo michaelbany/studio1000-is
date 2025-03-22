@@ -15,6 +15,9 @@ class Project extends Model
         'status' => ProjectStatusEnum::class,
     ];
 
+    /**
+     * Assigned members
+     */
     public function members()
     {
         return $this->belongsToMany(User::class, 'project_members')
@@ -22,6 +25,14 @@ class Project extends Model
             ->withPivot('role', 'id', 'status', 'approved_at', 'label')
             ->as('membership')
             ->withTimestamps();
+    }
+
+    /**
+     * empty member slots
+     */
+    public function slots()
+    {
+        return $this->hasMany(ProjectMember::class)->whereNull('user_id')->where('status', MembersStatusEnum::EMPTY, true);
     }
 
     public function owners()

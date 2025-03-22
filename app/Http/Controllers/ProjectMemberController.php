@@ -7,7 +7,6 @@ use App\Enums\RolesEnum;
 use App\Enums\MembersStatusEnum;
 use App\Models\Project;
 use App\Models\ProjectMember;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -24,12 +23,18 @@ class ProjectMemberController extends Controller
         return Inertia::render('Projects/Members', [
             'project' => $project,
             'members' => $project->members
-                ->filter(fn($member) => Gate::allows('view', $member->membership))
-                ->sortBy(fn($member) => $member->membership->role)
+                ->filter(fn($project) => Gate::allows('view', $project->membership))
+                ->sortBy(fn($project) => $project->membership->role)
                 ->values(),
+            'slots' => $project->slots,
             'roles' => ProjectRolesEnum::cases(), //todo
             'process' => MembersStatusEnum::cases(), //todo
         ]);
+    }
+
+    public function store(Request $request, Project $project)
+    {
+        //
     }
 
 
