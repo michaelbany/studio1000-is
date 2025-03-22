@@ -31,7 +31,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import ProjectLayout from '@/layouts/project/Layout.vue';
 import { label, statusColor } from '@/lib/helpers';
 import { Head, router, useForm, usePage } from '@inertiajs/vue3';
-import { ChevronsDownUp, Plus, Undo2, UserPlus2 } from 'lucide-vue-next';
+import { ChevronsDownUp, Plus, TriangleAlert, Undo2, UserPlus2 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import { toast } from 'vue-sonner';
 
@@ -306,7 +306,7 @@ const groups = computed<Record<string, any>>(() => {
                 <DialogContent class="sm:max-w-[425px]">
                     <DialogHeader>
                         <DialogTitle>Create a member slot</DialogTitle>
-                        <DialogDescription> Create a new member slot for this project. You can create multiple at once. </DialogDescription>
+                        <DialogDescription> Add empty slots to let others join this project. Create one or more at once. </DialogDescription>
                     </DialogHeader>
                     <form @submit.prevent="submitSlot" class="space-y-6">
                         <div class="mt-2 grid gap-2">
@@ -332,7 +332,7 @@ const groups = computed<Record<string, any>>(() => {
                             <InputError class="mt-2" :message="slotForm.errors.count" />
                         </div>
 
-                        <DialogFooter>
+                        <DialogFooter class="block">
                             <div class="flex w-full items-center justify-between">
                                 <NumberField class="w-[100px]" id="count" v-model="slotForm.count" :min="1" :max="30">
                                     <NumberFieldContent>
@@ -343,6 +343,10 @@ const groups = computed<Record<string, any>>(() => {
                                 </NumberField>
                                 <Button type="submit" :disabled="slotForm.processing"> Save </Button>
                             </div>
+                            <p v-if="page.project.status !== 'open'" class="text-center mt-4 text-orange-500 text-xs">
+                                <component :is="TriangleAlert" class="size-4 inline-block mr-1" />
+                                Others can't join this project until it's open.
+                            </p>
                         </DialogFooter>
                     </form>
                 </DialogContent>

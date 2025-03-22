@@ -31,7 +31,7 @@ class ProjectPolicy
             return true;
         }
 
-        if ($project->status === ProjectStatusEnum::OPEN) {
+        if ($project->status === ProjectStatusEnum::OPEN || $project->status === ProjectStatusEnum::CLOSED) {
             return true;
         }
 
