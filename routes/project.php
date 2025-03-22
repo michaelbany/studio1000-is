@@ -23,12 +23,20 @@ Route::group(['prefix' => 'project', 'middleware' => 'auth'], function () {
 
     Route::patch('/{project}', [ProjectController::class, 'update'])->name('project.update');
 
+    // members
     Route::post('/{project}/members', [ProjectMemberController::class, 'store'])->name('project.members.store');
     Route::put('/{project}/members/{member}', [ProjectMemberController::class, 'update'])->name('project.members.update');
     Route::delete('/{project}/members/{member}', [ProjectMemberController::class, 'destroy'])->name('project.members.destroy');
     Route::post('/{project}/members/{member}/apply', [ProjectMemberController::class, 'apply'])->name('project.members.apply');
     Route::post('/{project}/members/{member}/checkout', [ProjectMemberController::class, 'checkout'])->name('project.members.checkout');
 
+    // locations
+    Route::post('/{project}/locations', [LocationController::class, 'store'])->name('project.locations.store');
+    Route::put('/{project}/locations/{location}', [LocationController::class, 'update'])->name('project.locations.update');
+    Route::delete('/{project}/locations/{location}', [LocationController::class, 'destroy'])->name('project.locations.destroy');
+
+
+    // schedules
 });
 
 Route::get('/test', function () {

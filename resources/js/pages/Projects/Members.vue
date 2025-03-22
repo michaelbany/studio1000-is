@@ -79,6 +79,7 @@ const submitSlot = () => {
         preserveScroll: true,
         onSuccess: () => {
             slotModal.value = false;
+            slotForm.reset();
         },
     });
 };
@@ -89,6 +90,7 @@ const submitEditSlot = (update?: boolean | undefined) => {
             preserveScroll: true,
             onSuccess: () => {
                 slotEditModal.value = false;
+                slotEditForm.reset();
             },
         });
     } else {
@@ -96,6 +98,7 @@ const submitEditSlot = (update?: boolean | undefined) => {
             preserveScroll: true,
             onSuccess: () => {
                 slotEditModal.value = false;
+                slotEditForm.reset();
             },
         });
     }
@@ -107,7 +110,7 @@ const handleUndoApply = (slot: any) => {
     slotEditForm.role = slot.role;
     slotEditForm.user = slot.user_id;
     submitEditSlot(false);
-}
+};
 
 const submitCheckout = (value: any) => {
     if (!value || value.split('-').length !== 2) return;
@@ -163,7 +166,7 @@ const membership = computed(() => {
                 user_id: user,
             };
         })
-        .sort((a:any, b:any) => {
+        .sort((a: any, b: any) => {
             const nameA = a.user_id?.name?.toLowerCase() ?? '';
             const nameB = b.user_id?.name?.toLowerCase() ?? '';
             return nameA.localeCompare(nameB);
@@ -224,7 +227,11 @@ const groups = computed<Record<string, any>>(() => {
 
                 <Separator />
 
-                <Collapsible default-open class="space-y-2" v-for="(group, role) in groups" :key="role">
+                <div v-if="Object.keys(groups).length === 0">
+                    <p class="text-sm text-muted-foreground">No members found.</p>
+                </div>
+
+                <Collapsible v-else default-open class="space-y-2" v-for="(group, role) in groups" :key="role">
                     <div class="flex items-center justify-between space-x-4">
                         <h4 class="text-sm font-semibold">{{ label(role) }}s</h4>
                         <CollapsibleTrigger as-child>
@@ -283,9 +290,12 @@ const groups = computed<Record<string, any>>(() => {
                                             </SelectContent>
                                         </Select>
                                         <template #else>
-                                            <Badge :class="statusColor(member.status)" @click="member.status === 'pending' ? handleUndoApply(member) : null">{{ label(member.status) }}
+                                            <Badge
+                                                :class="statusColor(member.status)"
+                                                @click="member.status === 'pending' ? handleUndoApply(member) : null"
+                                                >{{ label(member.status) }}
                                                 <Can permission="project:leave">
-                                                    <component v-if="member.status === 'pending'" :is="Undo2" class="size-4 ml-1" />
+                                                    <component v-if="member.status === 'pending'" :is="Undo2" class="ml-1 size-4" />
                                                 </Can>
                                             </Badge>
                                         </template>
@@ -343,8 +353,8 @@ const groups = computed<Record<string, any>>(() => {
                                 </NumberField>
                                 <Button type="submit" :disabled="slotForm.processing"> Save </Button>
                             </div>
-                            <p v-if="page.project.status !== 'open'" class="text-center mt-4 text-orange-500 text-xs">
-                                <component :is="TriangleAlert" class="size-4 inline-block mr-1" />
+                            <p v-if="page.project.status !== 'open'" class="mt-4 text-center text-xs text-orange-500">
+                                <component :is="TriangleAlert" class="mr-1 inline-block size-4" />
                                 Others can't join this project until it's open.
                             </p>
                         </DialogFooter>
