@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProjectSchedule extends Model
 {
-    protected $fillable = ['location_id', 'project_id', 'title', 'description', 'date'];
-
+    protected $fillable = ['location_id', 'project_id', 'title', 'description', 'start_date', 'end_date'];
+    
     protected $casts = [
-        'date' => 'datetime',
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
     ];
 
     public function project()

@@ -56,7 +56,7 @@ class ProjectController extends Controller
             ]);
         }
 
-        return redirect()->route('project.show', $project);
+        return redirect()->route('project.summary', $project);
     }
 
     public function edit(Project $project)

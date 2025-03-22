@@ -19,7 +19,8 @@ return new class extends Migration
             $table->foreignIdFor(Location::class)->nullable()->constrained()->nullOnDelete();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->dateTime('date');
+            $table->dateTime('start_date');
+            $table->dateTime('end_date');
             $table->timestamps();
         });
     }

@@ -46,7 +46,7 @@ const projects = usePage().props.projects as any;
                     v-for="project in projects"
                     :key="project.id"
                     class="flex cursor-pointer items-center justify-between rounded-lg p-4 transition-colors hover:bg-stone-100 dark:hover:bg-stone-900"
-                    @click="router.visit(route('project.show', project.id))"
+                    @click="router.visit(route('project.summary', project.id))"
                 >
                     <div>
                         <p class="font-semibold">{{ project.name }}</p>
