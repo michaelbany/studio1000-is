@@ -20,6 +20,9 @@ Route::group(['prefix' => 'project'], function () {
     Route::get('/{project}/locations', [LocationController::class, 'index'])->name('project.locations');
     Route::get('/{project}/schedule', [ProjectScheduleController::class, 'index'])->name('project.schedule');
 
+
+    Route::patch('/{project}', [ProjectController::class, 'update'])->name('project.update');
+
 });
 
 Route::get('/test', function () {

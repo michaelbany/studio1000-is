@@ -20,7 +20,26 @@ class ProjectController extends Controller
 
         return inertia('Projects/Show', [
             'project' => $project,
+            'enum' => [
+                'project_status' => ProjectStatusEnum::array(),
+            ]
         ]);
+    }
+
+    public function update(Request $request, Project $project)
+    {
+        Gate::authorize('update', $project);
+
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['required', 'string'],
+            'external_link' => ['nullable', 'url'],
+            'status' => ['required', Rule::enum(ProjectStatusEnum::class)],
+        ]);
+
+        $project->update($request->only('name', 'description', 'external_link', 'status'));
+
+        return redirect()->route('project.summary', $project);
     }
 
     public function create()
@@ -65,21 +84,5 @@ class ProjectController extends Controller
             'project' => $project->load('members'),
             'status' => ProjectStatusEnum::cases(),
         ]);
-    }
-
-    public function update(Request $request, Project $project)
-    {
-        Gate::authorize('update', $project);
-
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string'],
-            'external_link' => ['nullable', 'url'],
-            'status' => ['required', Rule::enum(ProjectStatusEnum::class)],
-        ]);
-
-        $project->update($request->only('name', 'description', 'external_link', 'status'));
-
-        return redirect()->route('project.show', $project);
     }
 }
