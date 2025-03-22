@@ -26,7 +26,7 @@ import SelectItem from '@/components/ui/select/SelectItem.vue';
 import SelectTrigger from '@/components/ui/select/SelectTrigger.vue';
 import SelectValue from '@/components/ui/select/SelectValue.vue';
 import Separator from '@/components/ui/separator/Separator.vue';
-import { can, usePermissions } from '@/composables/usePermissions';
+import { can } from '@/composables/usePermissions';
 import AppLayout from '@/layouts/AppLayout.vue';
 import ProjectLayout from '@/layouts/project/Layout.vue';
 import { label, statusColor } from '@/lib/helpers';

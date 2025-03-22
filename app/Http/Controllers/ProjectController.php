@@ -80,15 +80,4 @@ class ProjectController extends Controller
 
         return redirect()->route('project.summary', $project);
     }
-
-    /**
-     * @deprecated
-     */
-    public function edit(Project $project)
-    {
-        return inertia('Projects/Edit', [
-            'project' => $project->load('members'),
-            'status' => ProjectStatusEnum::cases(),
-        ]);
-    }
 }
