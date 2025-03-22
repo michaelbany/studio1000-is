@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class ProjectMember extends Pivot
 {
-    protected $fillable = ['role', 'status', 'approved_at', 'label', 'user_id'];
+    protected $fillable = ['role', 'status', 'approved_at', 'label', 'user_id', 'project_id'];
     protected $table = 'project_members';
 
     protected $casts = [
@@ -52,6 +52,17 @@ class ProjectMember extends Pivot
             'user_id' => NULL,
         ]);
     }
+
+    public static function makeEmpty(Project $project): self
+    {
+        return self::make([
+            'status' => MembersStatusEnum::EMPTY,
+            'approved_at' => NULL,
+            'user_id' => NULL,
+            'project_id' => $project->id,
+        ]);
+    }
+
 
     public function join(User $user, string $role): void
     {

@@ -27,14 +27,32 @@ class ProjectMemberController extends Controller
                 ->sortBy(fn($project) => $project->membership->role)
                 ->values(),
             'slots' => $project->slots,
-            'roles' => ProjectRolesEnum::cases(), //todo
-            'process' => MembersStatusEnum::cases(), //todo
+            'enum' => [
+                'member_role' => ProjectRolesEnum::cases(),
+                'member_status' => MembersStatusEnum::cases(),
+            ],
         ]);
     }
 
+    /**
+     * Creating slot
+     */
     public function store(Request $request, Project $project)
     {
-        //
+        $request->validate([
+            'role' => ['required', Rule::enum(ProjectRolesEnum::class)],
+            'label' => ['nullable', 'string', 'max:50'],
+            'count' => ['required', 'integer', 'min:1', 'max:30'],
+        ]);
+
+        for ($i = 0; $i < $request->input('count'); $i++) {
+            $slot = ProjectMember::makeEmpty($project);
+            $slot->role = $request->input('role');
+            $slot->label = $request->input('label');
+            $slot->save();
+        }
+
+        return redirect()->back();
     }
 
 

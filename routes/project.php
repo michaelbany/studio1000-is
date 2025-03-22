@@ -23,6 +23,8 @@ Route::group(['prefix' => 'project'], function () {
 
     Route::patch('/{project}', [ProjectController::class, 'update'])->name('project.update');
 
+    Route::post('/{project}/members', [ProjectMemberController::class, 'store'])->name('project.members.store');
+
 });
 
 Route::get('/test', function () {
