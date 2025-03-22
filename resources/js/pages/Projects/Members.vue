@@ -30,9 +30,10 @@ import { can } from '@/composables/usePermissions';
 import AppLayout from '@/layouts/AppLayout.vue';
 import ProjectLayout from '@/layouts/project/Layout.vue';
 import { label, statusColor } from '@/lib/helpers';
-import { Head, useForm, usePage } from '@inertiajs/vue3';
+import { Head, router, useForm, usePage } from '@inertiajs/vue3';
 import { ChevronsDownUp, Plus, UserPlus2 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
+import { toast } from 'vue-sonner';
 
 const page = computed<any>(() => usePage().props);
 
@@ -80,6 +81,21 @@ const submitEditSlot = (update?: boolean | undefined) => {
             },
         });
     }
+};
+
+const submitApply = (slot: any) => {
+    router.post(
+        route('project.members.apply', [page.value.project.id, slot.id]),
+        {},
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                if (page.value.errors.apply) {
+                    toast.error(page.value.errors.apply);
+                }
+            },
+        },
+    );
 };
 
 const handleEditSlot = (slot: any) => {
@@ -168,8 +184,11 @@ const groups = computed<Record<string, any>>(() => {
                                     </div>
                                 </div>
 
-                                <Badge v-if="member.user_id" :class="statusColor(member.status)">{{ label(member.status) }}</Badge>
-                                <Button v-else variant="ghost" :disabled="!can('project:join')" size="sm" @click.stop>
+                                <Badge v-if="member.user_id" :class="statusColor(member.status)">
+                                    {{ label(member.status) }}
+                                </Badge>
+
+                                <Button v-else variant="ghost" :disabled="!can('project:join')" size="sm" @click.stop="() => submitApply(member)">
                                     <component :is="UserPlus2" class="size-5" />
                                     Apply
                                 </Button>

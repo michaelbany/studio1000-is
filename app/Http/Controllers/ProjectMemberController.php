@@ -79,6 +79,43 @@ class ProjectMemberController extends Controller
         return redirect()->back();
     }
 
+    public function apply(Project $project, ProjectMember $member)
+    {
+        Gate::authorize('join', $project);
+
+        $user = request()->user();
+
+        $roleExists = $project->members()->where('user_id', $user->id)->wherePivot('role', $member->role)->exists();
+
+        if ($roleExists) {
+            return redirect()->back()->withErrors([
+                'apply' => 'You have already applied for this role.',
+            ]);
+        }
+
+        $pendingRequests = $project->members()->where('user_id', $user->id)->wherePivot('status', MembersStatusEnum::PENDING)->count();
+
+        if ($pendingRequests >= 3) {
+            return redirect()->back()->withErrors([
+                'apply' => 'You already have 3 or more pending requests.',
+            ]);
+        }
+
+        // $status = $user->role === RolesEnum::ADMIN || $project->owners()->contains($user) ? MembersStatusEnum::APPROVED : MembersStatusEnum::PENDING;
+
+        $project->members()->attach($user->id, [
+            'role' => $member->role,
+            'label' => $member->label,
+            'status' => MembersStatusEnum::PENDING,
+        ]);
+
+        return redirect()->back();
+    }
+
+
+    /**
+     * @deprecated
+     */
     public function join(Request $request, Project $project)
     {
         $request->validate([
@@ -114,7 +151,9 @@ class ProjectMemberController extends Controller
         return redirect()->route('project.show', $project);
     }
 
-
+    /**
+     * @deprecated
+     */
     public function checkout(Request $request, Project $project, ProjectMember $member)
     {
         Gate::authorize('member_checkout', $project);
