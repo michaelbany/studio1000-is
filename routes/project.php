@@ -7,7 +7,7 @@ use App\Http\Controllers\ProjectScheduleController;
 use App\Models\Project;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['prefix' => 'project'], function () {
+Route::group(['prefix' => 'project', 'middleware' => 'auth'], function () {
     Route::get('/create', [ProjectController::class, 'create'])->name('project.create')->can('create', Project::class);
     Route::post('/', [ProjectController::class, 'store'])->name('project.store');
 
