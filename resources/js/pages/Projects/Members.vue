@@ -26,12 +26,12 @@ import SelectItem from '@/components/ui/select/SelectItem.vue';
 import SelectTrigger from '@/components/ui/select/SelectTrigger.vue';
 import SelectValue from '@/components/ui/select/SelectValue.vue';
 import Separator from '@/components/ui/separator/Separator.vue';
-import { can } from '@/composables/usePermissions';
+import { can, usePermissions } from '@/composables/usePermissions';
 import AppLayout from '@/layouts/AppLayout.vue';
 import ProjectLayout from '@/layouts/project/Layout.vue';
 import { label, statusColor } from '@/lib/helpers';
 import { Head, router, useForm, usePage } from '@inertiajs/vue3';
-import { ChevronsDownUp, Plus, UserPlus2 } from 'lucide-vue-next';
+import { ChevronsDownUp, Plus, Undo2, UserPlus2 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import { toast } from 'vue-sonner';
 
@@ -101,6 +101,14 @@ const submitEditSlot = (update?: boolean | undefined) => {
     }
 };
 
+const handleUndoApply = (slot: any) => {
+    slotEditForm.label = slot.label;
+    slotEditForm.id = slot.id;
+    slotEditForm.role = slot.role;
+    slotEditForm.user = slot.user_id;
+    submitEditSlot(false);
+}
+
 const submitCheckout = (value: any) => {
     if (!value || value.split('-').length !== 2) return;
     router.post(
@@ -138,7 +146,7 @@ const handleEditSlot = (slot: any) => {
     if (!can('project:update')) {
         return;
     }
-    
+
     slotEditForm.label = slot.label;
     slotEditForm.id = slot.id;
     slotEditForm.role = slot.role;
@@ -275,7 +283,11 @@ const groups = computed<Record<string, any>>(() => {
                                             </SelectContent>
                                         </Select>
                                         <template #else>
-                                            <Badge :class="statusColor(member.status)">{{ label(member.status) }}</Badge>
+                                            <Badge :class="statusColor(member.status)" @click="member.status === 'pending' ? handleUndoApply(member) : null">{{ label(member.status) }}
+                                                <Can permission="project:leave">
+                                                    <component v-if="member.status === 'pending'" :is="Undo2" class="size-4 ml-1" />
+                                                </Can>
+                                            </Badge>
                                         </template>
                                     </Can>
                                 </template>

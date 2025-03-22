@@ -74,7 +74,9 @@ class ProjectMemberController extends Controller
 
     public function destroy(Project $project, ProjectMember $member)
     {
-        Gate::authorize('member_delete', $project);
+        if (Gate::none(['member_checkout', 'leave'], $project)) {
+            abort(403);
+        }
         
         if ($member->status === MembersStatusEnum::APPROVED) {
             $member->empty();
