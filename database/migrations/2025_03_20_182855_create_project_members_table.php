@@ -16,9 +16,10 @@ return new class extends Migration
         Schema::create('project_members', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Project::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(User::class)->nullable()->constrained()->cascadeOnDelete();
             $table->string('role')->nullable();
-            $table->string('status')->default('pending');
+            $table->string('label')->nullable();
+            $table->string('status')->default('empty');
             $table->timestamp('approved_at')->nullable();
             $table->timestamps();
         });
