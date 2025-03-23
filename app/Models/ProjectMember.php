@@ -30,8 +30,8 @@ class ProjectMember extends Pivot
 
     public function approve()
     {
-        $slot = $this->project->slots()->where('role', $this->role)->first();
-
+        $slot = $this->project->slots()->where('role', $this->role)->where('label', $this->label, true)->first();
+        
         if ($slot) {
             $slot->update([
                 'user_id' => $this->user_id,
@@ -39,11 +39,18 @@ class ProjectMember extends Pivot
                 'approved_at' => Carbon::now(),
             ]);
 
-            ProjectMember::where('project_id', $this->project_id)
+            $otherSlots = $this->project->slots()->where('role', $this->role)->where('label', $this->label, true)->exists();
+            if (!$otherSlots) {
+                ProjectMember::where('project_id', $this->project_id)
                 ->where('role', $this->role)
+                ->where(fn($q) => $this->label
+                     ? $q->where('label', $this->label, true) 
+                     : $q->whereNull('label')
+                )
                 ->where('status', MembersStatusEnum::PENDING)
                 ->where('id', '!=', $this->id)
                 ->get()->each->reject();
+            }
 
             $this->delete();
         } else {

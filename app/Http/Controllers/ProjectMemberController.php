@@ -25,10 +25,6 @@ class ProjectMemberController extends Controller
             'members' => $project->members
                 ->filter(fn($project) => Gate::allows('view', $project->membership))
                 ->values(),
-            // 'members' => $project->members
-            //     ->filter(fn($project) => Gate::allows('view', $project->membership))
-            //     ->sortBy(fn($project) => $project->membership->role)
-            //     ->values(),
             'slots' => $project->slots,
             'enum' => [
                 'member_role' => ProjectRolesEnum::cases(),
@@ -77,7 +73,7 @@ class ProjectMemberController extends Controller
         if (Gate::none(['member_checkout', 'leave'], $project)) {
             abort(403);
         }
-        
+
         if ($member->status === MembersStatusEnum::APPROVED) {
             $member->empty();
         } else {
@@ -93,7 +89,15 @@ class ProjectMemberController extends Controller
 
         $user = request()->user();
 
-        $roleExists = $project->members()->where('user_id', $user->id)->wherePivot('role', $member->role)->exists();
+        $roleExists = $project->members()->where('user_id', $user->id)->wherePivot('role', $member->role)
+            ->where(function ($q) use ($member) {
+                if (empty($member->label)) {
+                    $q->whereNull('project_members.label');
+                } else {
+                    $q->where('project_members.label', $member->label);
+                }
+            })
+            ->exists();
 
         if ($roleExists) {
             return redirect()->back()->withErrors([

@@ -321,6 +321,9 @@ const groups = computed<Record<string, any>>(() => {
                     <form @submit.prevent="submitSlot" class="space-y-6">
                         <div class="mt-2 grid gap-2">
                             <Label for="label">Label</Label>
+                            <p class="text-sm text-muted-foreground">
+                                Applicants will be matched with slots sharing the same label. Leave blank to make it general.
+                            </p>
                             <Input v-model="slotForm.label" id="label" class="mt-1 block w-full" placeholder="e.g. Big Scary Wolf" />
                             <InputError class="mt-2" :message="slotForm.errors.label" />
                         </div>
