@@ -13,6 +13,7 @@ import Input from '@/components/ui/input/Input.vue';
 import Label from '@/components/ui/label/Label.vue';
 import Separator from '@/components/ui/separator/Separator.vue';
 import Textarea from '@/components/ui/textarea/Textarea.vue';
+import { can } from '@/composables/usePermissions';
 import AppLayout from '@/layouts/AppLayout.vue';
 import ProjectLayout from '@/layouts/project/Layout.vue';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
@@ -47,6 +48,9 @@ const editForm = useForm({
 });
 
 const handleOpenEdit = (location: any) => {
+    if (!can('project:update')) {
+        return;
+    }
     editForm.address = location.address;
     editForm.name = location.name;
     editForm.description = location.description;
@@ -61,7 +65,7 @@ const submitEdit = (update?: boolean) => {
             onSuccess: () => {
                 editModal.value = false;
                 editForm.reset();
-            }
+            },
         });
     } else {
         editForm.delete(route('project.locations.destroy', [page.value.project.id, editForm.id]), {
@@ -69,8 +73,8 @@ const submitEdit = (update?: boolean) => {
             onSuccess: () => {
                 editModal.value = false;
                 editForm.reset();
-            }
-        })
+            },
+        });
     }
 };
 </script>
@@ -95,7 +99,13 @@ const submitEdit = (update?: boolean) => {
                 </div>
 
                 <div v-else class="space-y-4">
-                    <div v-for="location in page.locations" :key="location.id" @click="handleOpenEdit(location)" class="flex items-start rounded-lg border p-4">
+                    <div
+                        v-for="location in page.locations"
+                        :key="location.id"
+                        @click="handleOpenEdit(location)"
+                        :class="can('project:update') ? 'cursor-pointer' : ''"
+                        class="flex items-start rounded-lg border p-4"
+                    >
                         <div class="w-10 flex-shrink-0">
                             <component :is="Pin" class="mt-1 size-5 text-primary" />
                         </div>
@@ -168,7 +178,9 @@ const submitEdit = (update?: boolean) => {
 
                         <DialogFooter>
                             <div class="flex w-full items-center justify-between">
-                                <Button type="button" variant="destructive" :disabled="editForm.processing" @click="() => submitEdit(false)"> Delete </Button>
+                                <Button type="button" variant="destructive" :disabled="editForm.processing" @click="() => submitEdit(false)">
+                                    Delete
+                                </Button>
                             </div>
                             <Button type="submit" :disabled="editForm.processing"> Create </Button>
                         </DialogFooter>
