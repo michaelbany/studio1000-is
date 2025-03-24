@@ -20,7 +20,7 @@ const dayValue = props.day.day.toLocaleString(rootContext.locale.value);
   <CalendarCellTrigger
     :class="cn(
       'h-full w-full group border border-muted hover:bg-stone-50 rounded-md p-0 font-normal absolute top-0 left-0 z-10',
-      '[&[data-today]:not([data-selected])]:bg-red-500/10 [&[data-today]:not([data-selected])]:text-red-500',
+      '[&[data-today]:not([data-selected])]:bg-red-500/10 [&[data-today]:not([data-selected])]:text-red-500 data-[today]:text-red-500 data-[today]:focus:text-red-500',
       // // Selected
       'data-[selected]:bg-primary data-[selected]:text-primary-foreground data-[selected]:font-semibold data-[selected]:opacity-100 data-[selected]:focus:text-primary-foreground',
       // // Disabled

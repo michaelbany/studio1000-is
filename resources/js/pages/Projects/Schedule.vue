@@ -35,12 +35,14 @@ const first = computed<CalendarEvent | null>(() => {
     return [...events.value].sort((a, b) => a.start.compare(b.start))[0];
 });
 
-const currentSelectedDate = ref<DateValue | undefined>(first.value?.start ?? undefined);
-
+const currentSelectedDate = ref<DateValue | undefined>();
 const eventsInRange = ref<CalendarEvent[]>([]);
 
 function handleDateChanged(date: DateValue | undefined) {
-    if (!date) return;
+    if (!date) {
+        eventsInRange.value = [];
+        return;
+    }
 
     currentSelectedDate.value = date;
     eventsInRange.value = events.value.filter((event) => {
@@ -69,11 +71,18 @@ onMounted(() => {
                     </Can>
                 </div>
                 <!-- @vue-ignore -->
-                <FullCalendar :weekStartsOn="1" weekdayFormat="short" :default-value="first?.start" @update:model-value="handleDateChanged" :events="events" />
+                <FullCalendar
+                    :weekStartsOn="1"
+                    weekdayFormat="short"
+                    @update:model-value="handleDateChanged"
+                    :events="events"
+                    v-model="currentSelectedDate"
+                />
+
                 <Separator />
                 <div class="p-3">
                     <HeadingSmall title="Events" />
-                    <div v-if="eventsInRange.length === 0" class="text-sm text-muted-foreground">No events found.</div>
+                    <div v-if="eventsInRange.length === 0" class="text-sm text-muted-foreground py-3">No events found.</div>
 
                     <div v-else>
                         <div v-for="event in eventsInRange" :key="event.id" class="flex items-baseline gap-3 py-4">
