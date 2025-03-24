@@ -16,7 +16,7 @@ class ProjectScheduleController extends Controller
 
         return inertia('Projects/Schedule', [
             'project' => $project,
-            'schedule' => $project->schedules,
+            'schedules' => $project->schedules,
         ]);
     }
 }
