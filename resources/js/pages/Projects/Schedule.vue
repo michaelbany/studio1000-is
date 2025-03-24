@@ -4,6 +4,7 @@ import HeadingSmall from '@/components/HeadingSmall.vue';
 import Button from '@/components/ui/button/Button.vue';
 import { FullCalendar } from '@/components/ui/full-calendar';
 import { CalendarEvent } from '@/components/ui/full-calendar/FullCalendar.vue';
+import Separator from '@/components/ui/separator/Separator.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import ProjectLayout from '@/layouts/project/Layout.vue';
 import { isDateInRange } from '@/lib/helpers';
@@ -59,24 +60,24 @@ onMounted(() => {
     <AppLayout>
         <ProjectLayout>
             <div class="flex flex-col space-y-6">
-                <HeadingSmall title="Schedule" description="Manage your project schedules." />
+                <div class="flex justify-between">
+                    <HeadingSmall title="Schedule" description="Manage your project schedules." />
+                    <Can permission="project:update">
+                        <Button variant="ghost" size="icon" @click="createModal = true">
+                            <component :is="Plus" class="size-5" />
+                        </Button>
+                    </Can>
+                </div>
                 <!-- @vue-ignore -->
-                <FullCalendar :default-value="first?.start" @update:model-value="handleDateChanged" :events="events" />
+                <FullCalendar :weekStartsOn="1" weekdayFormat="short" :default-value="first?.start" @update:model-value="handleDateChanged" :events="events" />
+                <Separator />
                 <div class="p-3">
-                    <div class="flex justify-between">
-
-                        <h2 class="my-1 text-lg font-semibold">Events</h2>
-                        <Can permission="project:update">
-                            <Button variant="ghost" size="icon" @click="createModal = true">
-                                <component :is="Plus" class="size-5" />
-                            </Button>
-                        </Can>
-                    </div>
+                    <HeadingSmall title="Events" />
                     <div v-if="eventsInRange.length === 0" class="text-sm text-muted-foreground">No events found.</div>
 
                     <div v-else>
                         <div v-for="event in eventsInRange" :key="event.id" class="flex items-baseline gap-3 py-4">
-                            <span class="w-[90px] shrink-0 text-sm text-muted-foreground">
+                            <span class="w-[90px] shrink-0 text-xs text-muted-foreground">
                                 <!-- same day -->
                                 <template v-if="isSameDay(event.start as DateValue, event.end as DateValue)">
                                     {{ event.start.toDate(timeZone).getHours() }}:{{ event.start.toDate(timeZone).getHours() }} -
@@ -92,14 +93,19 @@ onMounted(() => {
                                 </template>
                                 <!-- start and end different day -->
                                 <template v-else>
-                                    Ongoing<br>({{ event.start.toDate(timeZone).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' }) }}
+                                    Ongoing<br />({{ event.start.toDate(timeZone).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' }) }}
                                     -
                                     {{ event.end.toDate(timeZone).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' }) }})
                                 </template>
                             </span>
                             <div>
-                                <h3 class="text-lg font-semibold flex items-center gap-2"><div class="h-3 w-3 rounded-full bg-primary" :style="{backgroundColor: event.color}"></div>{{ event.title }}</h3>
-                                <p class="text-sm text-muted-foreground">{{ event.description }}</p>
+                                <div class="space-y-2">
+                                    <h3 class="flex items-center gap-2 text-base font-medium">
+                                        <div class="h-2 w-2 rounded-full bg-primary" :style="{ backgroundColor: event.color }"></div>
+                                        {{ event.title }}
+                                    </h3>
+                                    <p class="text-sm text-muted-foreground">{{ event.description }}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
