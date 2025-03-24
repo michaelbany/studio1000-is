@@ -1,3 +1,5 @@
+import { toCalendarDateTime, type DateValue } from '@internationalized/date';
+
 export function label(text?: string) {
     if (!text) return;
     // slova, která se mají vždy psát malými písmeny
@@ -102,4 +104,11 @@ export function statusColor(status: string) {
         default:
             return 'bg-gray-500/20 text-gray-500 hover:bg-gray-500/30';
     }
+}
+
+export function isDateInRange(date: DateValue, start: DateValue, end: DateValue) {
+    const dayStart = toCalendarDateTime(date).set({ hour: 0, minute: 0, second: 0 });
+    const dayEnd = toCalendarDateTime(date).set({ hour: 23, minute: 59, second: 59 });
+
+    return start.compare(dayEnd) <= 0 && end.compare(dayStart) >= 0;
 }

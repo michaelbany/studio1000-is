@@ -1,15 +1,18 @@
 <script lang="ts" setup>
 import { cn } from '@/lib/utils'
-import { CalendarRoot, type CalendarRootEmits, type CalendarRootProps, useForwardPropsEmits } from 'reka-ui'
+import { CalendarRoot, type CalendarRootEmits, type CalendarRootProps, DateValue, useForwardPropsEmits } from 'reka-ui'
 import { computed, type HTMLAttributes } from 'vue'
 import { FullCalendarCell, FullCalendarCellTrigger, FullCalendarGrid, FullCalendarGridBody, FullCalendarGridHead, FullCalendarGridRow, FullCalendarHeadCell, FullCalendarHeader, FullCalendarHeading, FullCalendarNextButton, FullCalendarPrevButton } from '.'
+import { toCalendarDateTime } from '@internationalized/date';
+import { isDateInRange } from '@/lib/helpers';
 
-type CalendarEvent = {
-  id: number
-  title: string
-  start_date: string
-  end_date: string
-  color?: string
+export type CalendarEvent = {
+    id: number;
+    title: string;
+    description: string;
+    start: DateValue;
+    end: DateValue;
+    color?: string;
 }
 
 const props = defineProps<CalendarRootProps & { class?: HTMLAttributes['class'], events: CalendarEvent[] }>()
@@ -21,10 +24,6 @@ const delegatedProps = computed(() => {
 
   return delegated
 })
-
-function toDateOnly(date: string | Date) {
-  return new Date(new Date(date).toDateString());
-}
 
 
 
@@ -67,7 +66,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
               >
 
               <template v-for="event in props.events
-                .filter(e => toDateOnly(weekDate) >= toDateOnly(e.start_date) && toDateOnly(weekDate) <= toDateOnly(e.end_date))
+                .filter(e => isDateInRange(weekDate, e.start, e.end))
                 .slice(0, 3)"
                 :key="event.id">
                 <div
