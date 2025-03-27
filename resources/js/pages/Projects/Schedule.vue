@@ -75,17 +75,16 @@ const createModal = ref(false);
 const createForm = useForm({
     title: '',
     description: '',
-    start_date: undefined,
-    start_time: undefined,
-    end_date: undefined,
-    end_time: undefined,
+    start_date: new Date().toISOString().slice(0, 10),
+    start_time: '10:00',
+    end_date: new Date().toISOString().slice(0, 10),
+    end_time: '12:00',
     color: null,
     location_id: null,
 });
 
 const submitCreate = () => {
     const startISO = createForm.start_date && createForm.start_time ? toISOStringFromDateAndTime(createForm.start_date, createForm.start_time) : null;
-
     const endISO = createForm.end_date && createForm.end_time ? toISOStringFromDateAndTime(createForm.end_date, createForm.end_time) : null;
 
     router.post(
@@ -100,10 +99,24 @@ const submitCreate = () => {
             onSuccess: () => {
                 createModal.value = false;
                 createForm.reset();
+                createForm.clearErrors();
+            },
+            onError: (errors) => {
+                Object.keys(errors).forEach((key) => {
+                    createForm.setError(key as keyof typeof createForm.data, errors[key]);
+                });
             },
         },
     );
 };
+
+const handleDoubleClick = (date: DateValue | undefined) => {
+    if (!date) return;
+
+    createModal.value = true;
+    createForm.start_date = date.toDate(timeZone).toISOString().slice(0, 10);
+    createForm.end_date = date.toDate(timeZone).toISOString().slice(0, 10);
+}
 </script>
 
 <template>
@@ -126,6 +139,8 @@ const submitCreate = () => {
                     @update:model-value="handleDateChanged"
                     :events="events"
                     v-model="currentSelectedDate"
+                    prevent-deselect
+                    @double-click="handleDoubleClick"
                 />
 
                 <Separator />
@@ -143,11 +158,11 @@ const submitCreate = () => {
                                 </template>
                                 <!-- Start same day: -->
                                 <template v-else-if="isSameDay(event.start as DateValue, currentSelectedDate as DateValue)">
-                                    Starts at {{ event.start.toDate(timeZone).getHours() }}:{{ event.start.toDate(timeZone).getHours() }}
+                                    Starts at {{ event.start.toDate(timeZone).toTimeString().slice(0, 5) }}
                                 </template>
                                 <!-- end this day -->
                                 <template v-else-if="isSameDay(event.end as DateValue, currentSelectedDate as DateValue)">
-                                    Ends at {{ event.end.toDate(timeZone).getHours() }}:{{ event.end.toDate(timeZone).getMinutes() }}
+                                    Ends at {{ event.end.toDate(timeZone).toTimeString().slice(0, 5) }}
                                 </template>
                                 <!-- start and end different day -->
                                 <template v-else>

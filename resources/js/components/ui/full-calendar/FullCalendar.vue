@@ -4,7 +4,7 @@ import { CalendarRoot, type CalendarRootEmits, type CalendarRootProps, DateValue
 import { computed, type HTMLAttributes } from 'vue'
 import { FullCalendarCell, FullCalendarCellTrigger, FullCalendarGrid, FullCalendarGridBody, FullCalendarGridHead, FullCalendarGridRow, FullCalendarHeadCell, FullCalendarHeader, FullCalendarHeading, FullCalendarNextButton, FullCalendarPrevButton } from '.'
 import { toCalendarDateTime } from '@internationalized/date';
-import { isDateInRange } from '@/lib/helpers';
+import { isDateInRange, onDoubleClick } from '@/lib/helpers';
 
 export type CalendarEvent = {
     id: number;
@@ -16,17 +16,19 @@ export type CalendarEvent = {
     color?: string;
 }
 
+type Emits = CalendarRootEmits & {
+  'doubleClick': [date: DateValue | undefined];
+};
+
 const props = defineProps<CalendarRootProps & { class?: HTMLAttributes['class'], events: CalendarEvent[] }>()
 
-const emits = defineEmits<CalendarRootEmits>()
+const emits = defineEmits<Emits>()
 
 const delegatedProps = computed(() => {
   const { class: _, ...delegated } = props
 
   return delegated
 })
-
-
 
 const forwarded = useForwardPropsEmits(delegatedProps, emits)
 </script>
@@ -64,6 +66,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
               <FullCalendarCellTrigger
                 :day="weekDate"
                 :month="month.value"
+                @click="() => onDoubleClick(() => $emit('doubleClick', weekDate))"
               >
 
               <template v-for="event in props.events

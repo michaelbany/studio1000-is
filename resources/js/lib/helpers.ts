@@ -113,9 +113,24 @@ export function isDateInRange(date: DateValue, start: DateValue, end: DateValue)
     return start.compare(dayEnd) <= 0 && end.compare(dayStart) >= 0;
 }
 
-export const toISOStringFromDateAndTime = (date: Date, time: string) => {
+export const toISOStringFromDateAndTime = (date: string, time: string) => {
     const [hours, minutes] = time.split(':').map(Number);
     const combined = new Date(date);
     combined.setHours(hours, minutes, 0, 0);
     return combined.toISOString();
-  };
+};
+
+let clickTimeout: ReturnType<typeof setTimeout> | null = null;
+const DOUBLE_CLICK_DELAY = 300; // ms
+
+export const onDoubleClick = (callback: () => void) => {
+    if (clickTimeout) {
+        clearTimeout(clickTimeout);
+        clickTimeout = null;
+        callback();
+    } else {
+        clickTimeout = setTimeout(() => {
+            clickTimeout = null;
+        }, DOUBLE_CLICK_DELAY);
+    }
+};

@@ -36,8 +36,8 @@ class ProjectScheduleController extends Controller
             'description' => ['nullable', 'string'],
             'start_date' => ['required', 'date'],
             'end_date' => ['required', 'date'],
-            'location_id' => ['nullable', 'exists:location'],
-            'color' => ['required', 'string', Rule::enum(ScheduleColorEnum::class)],
+            'location_id' => ['nullable', 'exists:locations,id'],
+            'color' => ['nullable', 'string', Rule::enum(ScheduleColorEnum::class)],
         ]);
 
         $project->schedules()->create($request->only('title', 'description', 'start_date', 'end_date', 'location_id', 'color'));
@@ -54,7 +54,7 @@ class ProjectScheduleController extends Controller
             'description' => ['nullable', 'string'],
             'start_date' => ['required', 'datetime'],
             'end_date' => ['required', 'datetime'],
-            'location_id' => ['nullable', 'exists:location'],
+            'location_id' => ['nullable', 'exists:locations,id'],
             'color' => ['nullable', 'string', Rule::enum(ScheduleColorEnum::class)],
         ]);
 
