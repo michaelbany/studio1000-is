@@ -49,4 +49,9 @@ class Project extends Model
     {
         return $this->hasMany(ProjectSchedule::class);
     }
+
+    public function approvedMembers()
+    {
+        return $this->members()->wherePivot('status', MembersStatusEnum::APPROVED->value);
+    }
 }

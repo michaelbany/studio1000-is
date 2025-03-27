@@ -182,7 +182,7 @@ const submitEdit = (update?: boolean) => {
                                     Delete
                                 </Button>
                             </div>
-                            <Button type="submit" :disabled="editForm.processing"> Create </Button>
+                            <Button type="submit" :disabled="editForm.processing"> Update </Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>

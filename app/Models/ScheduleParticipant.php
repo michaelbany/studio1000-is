@@ -10,8 +10,8 @@ class ScheduleParticipant extends Pivot
     protected $table = 'schedule_participants';
 
     protected $casts = [
-        'call_time' => 'time',
-        'wrap_time' => 'time',
+        'call_time' => 'datetime',
+        'wrap_time' => 'datetime',
     ];
 
     public function schedule()

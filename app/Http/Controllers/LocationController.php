@@ -43,7 +43,7 @@ class LocationController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:50'],
             'address' => ['required', 'string'],
-            'description' => ['required', 'string'],
+            'description' => ['nullable', 'string'],
         ]);
 
         $location->update($request->only('name', 'address', 'description'));

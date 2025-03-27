@@ -1,5 +1,12 @@
 import { toCalendarDateTime, type DateValue } from '@internationalized/date';
 
+export function inicials(name: string) {
+    return name
+        .split(/[.:\-_ ]/)
+        .map((word) => word.charAt(0).toUpperCase())
+        .join('');
+}
+
 export function label(text?: string) {
     if (!text) return;
     // slova, která se mají vždy psát malými písmeny

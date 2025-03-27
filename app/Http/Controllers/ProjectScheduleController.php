@@ -19,8 +19,9 @@ class ProjectScheduleController extends Controller
 
         return inertia('Projects/Schedule', [
             'project' => $project,
-            'schedules' => $project->schedules,
+            'schedules' => $project->schedules->load('participants.user'),
             'locations' => $project->locations,
+            'members' => $project->approvedMembers->unique('id'),
             'enum' => [
                 'schedule_color' => ScheduleColorEnum::cases(),
             ]
@@ -52,13 +53,20 @@ class ProjectScheduleController extends Controller
         $request->validate([
             'title' => ['required', 'string', 'max:50'],
             'description' => ['nullable', 'string'],
-            'start_date' => ['required', 'datetime'],
-            'end_date' => ['required', 'datetime'],
+            'start_date' => ['required', 'date'],
+            'end_date' => ['required', 'date'],
             'location_id' => ['nullable', 'exists:locations,id'],
             'color' => ['nullable', 'string', Rule::enum(ScheduleColorEnum::class)],
+            'participants' => ['nullable', 'array'],
         ]);
 
         $schedule->update($request->only('title', 'description', 'start_date', 'end_date', 'location_id', 'color'));
+
+        if ($request->has('participants')) {
+            $schedule->participants()->sync($request->participants);
+        } else {
+            $schedule->participants()->detach();
+        }
         
         return redirect()->route('project.schedule', $project);
     }

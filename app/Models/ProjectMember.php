@@ -111,12 +111,6 @@ class ProjectMember extends Pivot
     }
 
 
-    public function join(User $user, string $role): void
-    {
-        // 
-    }
-
-
     public function isEmpty(): bool
     {
         return $this->status === MembersStatusEnum::EMPTY && $this->user_id === NULL;

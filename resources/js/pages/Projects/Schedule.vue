@@ -2,6 +2,8 @@
 import Can from '@/components/Can.vue';
 import HeadingSmall from '@/components/HeadingSmall.vue';
 import InputError from '@/components/InputError.vue';
+import Avatar from '@/components/ui/avatar/Avatar.vue';
+import AvatarFallback from '@/components/ui/avatar/AvatarFallback.vue';
 import Button from '@/components/ui/button/Button.vue';
 import ColorPicker from '@/components/ui/ColorPicker.vue';
 import Dialog from '@/components/ui/dialog/Dialog.vue';
@@ -10,6 +12,10 @@ import DialogDescription from '@/components/ui/dialog/DialogDescription.vue';
 import DialogFooter from '@/components/ui/dialog/DialogFooter.vue';
 import DialogHeader from '@/components/ui/dialog/DialogHeader.vue';
 import DialogTitle from '@/components/ui/dialog/DialogTitle.vue';
+import DropdownMenu from '@/components/ui/dropdown-menu/DropdownMenu.vue';
+import DropdownMenuCheckboxItem from '@/components/ui/dropdown-menu/DropdownMenuCheckboxItem.vue';
+import DropdownMenuContent from '@/components/ui/dropdown-menu/DropdownMenuContent.vue';
+import DropdownMenuTrigger from '@/components/ui/dropdown-menu/DropdownMenuTrigger.vue';
 import { FullCalendar } from '@/components/ui/full-calendar';
 import { CalendarEvent } from '@/components/ui/full-calendar/FullCalendar.vue';
 import Input from '@/components/ui/input/Input.vue';
@@ -20,13 +26,19 @@ import SelectItem from '@/components/ui/select/SelectItem.vue';
 import SelectTrigger from '@/components/ui/select/SelectTrigger.vue';
 import SelectValue from '@/components/ui/select/SelectValue.vue';
 import Separator from '@/components/ui/separator/Separator.vue';
+import Sheet from '@/components/ui/sheet/Sheet.vue';
+import SheetContent from '@/components/ui/sheet/SheetContent.vue';
+import SheetDescription from '@/components/ui/sheet/SheetDescription.vue';
+import SheetFooter from '@/components/ui/sheet/SheetFooter.vue';
+import SheetHeader from '@/components/ui/sheet/SheetHeader.vue';
+import SheetTitle from '@/components/ui/sheet/SheetTitle.vue';
 import Textarea from '@/components/ui/textarea/Textarea.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import ProjectLayout from '@/layouts/project/Layout.vue';
-import { isDateInRange, label, toISOStringFromDateAndTime } from '@/lib/helpers';
+import { inicials, isDateInRange, label, toISOStringFromDateAndTime } from '@/lib/helpers';
 import { Head, router, useForm, usePage } from '@inertiajs/vue3';
 import { fromDate, isSameDay, type DateValue } from '@internationalized/date';
-import { Pin, Plus } from 'lucide-vue-next';
+import { Edit, Pin, Plus } from 'lucide-vue-next';
 import { computed, onMounted, ref } from 'vue';
 
 const page = computed<any>(() => usePage().props);
@@ -43,7 +55,8 @@ const events = computed<CalendarEvent[]>(() => {
         start: fromDate(new Date(schedule.start_date), timeZone),
         end: fromDate(new Date(schedule.end_date), timeZone),
         color: schedule.color,
-    }));
+        participants: schedule.participants,
+    })).sort((a: any, b: any) => a.start.compare(b.start));
 });
 
 const first = computed<CalendarEvent | null>(() => {
@@ -83,6 +96,34 @@ const createForm = useForm({
     location_id: null,
 });
 
+const editModal = ref(false);
+const editForm = useForm({
+    id: 0,
+    title: '',
+    description: '',
+    start_date: new Date().toISOString().slice(0, 10),
+    start_time: '10:00',
+    end_date: new Date().toISOString().slice(0, 10),
+    end_time: '12:00',
+    color: '',
+    location_id: 0,
+    participants: [],
+});
+
+const handleOpenEvent = (event: CalendarEvent) => {
+    editModal.value = true;
+    editForm.id = event.id;
+    editForm.title = event.title;
+    editForm.description = event.description;
+    editForm.start_date = event.start.toDate(timeZone).toISOString().slice(0, 10);
+    editForm.start_time = event.start.toDate(timeZone).toTimeString().slice(0, 5);
+    editForm.end_date = event.end.toDate(timeZone).toISOString().slice(0, 10);
+    editForm.end_time = event.end.toDate(timeZone).toTimeString().slice(0, 5);
+    editForm.color = event.color as string;
+    editForm.location_id = event.location as number;
+    editForm.participants = event.participants.map((participant: any) => participant.id);
+};
+
 const submitCreate = () => {
     const startISO = createForm.start_date && createForm.start_time ? toISOStringFromDateAndTime(createForm.start_date, createForm.start_time) : null;
     const endISO = createForm.end_date && createForm.end_time ? toISOStringFromDateAndTime(createForm.end_date, createForm.end_time) : null;
@@ -110,13 +151,40 @@ const submitCreate = () => {
     );
 };
 
+const submitEdit = () => {
+    const startISO = editForm.start_date && editForm.start_time ? toISOStringFromDateAndTime(editForm.start_date, editForm.start_time) : null;
+    const endISO = editForm.end_date && editForm.end_time ? toISOStringFromDateAndTime(editForm.end_date, editForm.end_time) : null;
+
+    router.put(
+        route('project.schedules.update', [page.value.project.id, editForm.id]),
+        {
+            ...editForm.data(),
+            start_date: startISO,
+            end_date: endISO,
+        },
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                editModal.value = false;
+                editForm.reset();
+                editForm.clearErrors();
+            },
+            onError: (errors) => {
+                Object.keys(errors).forEach((key) => {
+                    editForm.setError(key as keyof typeof editForm.data, errors[key]);
+                });
+            },
+        },
+    );
+};
+
 const handleDoubleClick = (date: DateValue | undefined) => {
     if (!date) return;
 
     createModal.value = true;
     createForm.start_date = date.toDate(timeZone).toISOString().slice(0, 10);
     createForm.end_date = date.toDate(timeZone).toISOString().slice(0, 10);
-}
+};
 </script>
 
 <template>
@@ -171,18 +239,33 @@ const handleDoubleClick = (date: DateValue | undefined) => {
                                     {{ event.end.toDate(timeZone).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' }) }})
                                 </template>
                             </span>
-                            <div>
-                                <div class="space-y-2">
-                                    <h3 class="flex items-center gap-2 text-base font-medium">
+                            <div class="w-full">
+                                <div class="w-full space-y-2">
+                                    <h3 class="flex w-full items-center gap-2 text-base font-medium">
                                         <div class="h-2 w-2 rounded-full bg-primary" :style="{ backgroundColor: event.color }"></div>
                                         {{ event.title }}
+                                        <Button size="icon" variant="ghost" @click="handleOpenEvent(event as CalendarEvent)" class="ml-auto">
+                                            <component :is="Edit" class="size-4 cursor-pointer text-muted-foreground" />
+                                        </Button>
                                     </h3>
-                                    <p class="text-sm text-muted-foreground flex gap-1 items-center" v-if="event.location">
-                                        <component :is="Pin" class="size-4 text-muted-foreground"  />
+
+                                    <p class="flex items-center gap-1 text-sm text-muted-foreground" v-if="event.location">
+                                        <component :is="Pin" class="size-4 text-muted-foreground" />
                                         {{ page.locations.find((location: any) => location.id === event.location)?.name }}
                                     </p>
                                     <Separator class="my-2" v-if="event.description" />
                                     <p class="text-sm text-muted-foreground">{{ event.description }}</p>
+
+                                    <div v-if="event.participants.length" class="!mt-4 flex items-center gap-1">
+                                        <p class="text-sm text-muted-foreground">Participants:</p>
+                                        <Avatar v-for="participant in event.participants" :key="participant" class="h-8 w-8">
+                                            <AvatarFallback
+                                                class="rounded-lg bg-neutral-200 font-semibold text-black dark:bg-neutral-700 dark:text-white"
+                                            >
+                                                {{ inicials(participant.user.name) }}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -251,6 +334,104 @@ const handleDoubleClick = (date: DateValue | undefined) => {
                     </form>
                 </DialogContent>
             </Dialog>
+
+            <Sheet v-model:open="editModal">
+                <SheetContent class="w-full sm:max-w-[700px]">
+                    <SheetHeader>
+                        <SheetTitle>{{ editForm.title }}</SheetTitle>
+                        <SheetDescription> Make changes to this event. Click save when you're done. </SheetDescription>
+                    </SheetHeader>
+                    <form @submit.prevent="submitEdit" class="space-y-6">
+                        <div class="mt-2 grid gap-2">
+                            <Label for="name">Title</Label>
+                            <Input v-model="editForm.title" id="name" class="mt-1 block w-full" placeholder="e.g. Project Kickoff" />
+                            <InputError class="mt-2" :message="editForm.errors.title" />
+                        </div>
+
+                        <div class="mt-2 grid gap-2">
+                            <Label for="location">Location</Label>
+                            <Select v-model="editForm.location_id" id="location" class="mt-1 block">
+                                <SelectTrigger class="">
+                                    <SelectValue placeholder="Select Location" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem v-if="page.locations.length" v-for="(location, i) in page.locations" :key="i" :value="location.id">
+                                        {{ label(location.name) }}
+                                    </SelectItem>
+                                    <SelectItem v-else value="0" disabled>No locations found</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <InputError class="mt-2" :message="editForm.errors.location_id" />
+                        </div>
+
+                        <div class="mt-2">
+                            <Label for="date">Start</Label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <Input type="date" v-model="editForm.start_date" id="date" class="mt-1 block w-full" />
+                                <Input type="time" v-model="editForm.start_time" id="date" class="mt-1 block w-full" />
+                            </div>
+                            <InputError class="mt-2" :message="editForm.errors.start_date" />
+                        </div>
+                        <div class="mt-2">
+                            <Label for="date">End</Label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <Input type="date" v-model="editForm.end_date" id="date" class="mt-1 block w-full" />
+                                <Input type="time" v-model="editForm.end_time" id="date" class="mt-1 block w-full" />
+                            </div>
+                            <InputError class="mt-2" :message="editForm.errors.end_date" />
+                        </div>
+
+                        <div class="mt-2 grid gap-2">
+                            <Label for="description">Description</Label>
+                            <Textarea v-model="editForm.description" id="description" class="mt-1 block w-full" />
+                            <InputError class="mt-2" :message="editForm.errors.description" />
+                        </div>
+
+                        <div class="mt-2 grid gap-2">
+                            <Label for="participants">Participants</Label>
+
+                            <DropdownMenu>
+                                <DropdownMenuTrigger as-child>
+                                    <Button variant="outline" class="flex justify-start gap-1 p-3">
+                                        <div
+                                            v-if="editForm.participants.length"
+                                            v-for="p in editForm.participants"
+                                            :key="p"
+                                            class="rounded-md bg-primary/10 px-2 py-1 text-primary"
+                                        >
+                                            {{ page.members.find((member: any) => member.membership.id === p)?.name }}
+                                        </div>
+                                        <div v-else>Select participants</div>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent class="w-56">
+                                    <DropdownMenuCheckboxItem
+                                        v-for="participant in page.members"
+                                        :key="participant.membership.id"
+                                        @select="(e) => e.preventDefault()"
+                                        :checked="editForm.participants.includes(participant.membership.id as never)"
+                                        @update:checked="
+                                            editForm.participants.includes(participant.membership.id as never)
+                                                ? editForm.participants.splice(editForm.participants.indexOf(participant.membership.id as never), 1)
+                                                : editForm.participants.push(participant.membership.id as never)
+                                        "
+                                    >
+                                        {{ participant.name }}
+                                    </DropdownMenuCheckboxItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                            <InputError class="mt-2" :message="editForm.errors.participants" />
+                        </div>
+
+                        <SheetFooter>
+                            <div class="flex w-full items-center justify-between gap-2">
+                                <ColorPicker v-model="editForm.color" id="color" :options="page.enum.schedule_color" />
+                                <Button type="submit" :disabled="editForm.processing"> Save </Button>
+                            </div>
+                        </SheetFooter>
+                    </form>
+                </SheetContent>
+            </Sheet>
         </ProjectLayout>
     </AppLayout>
 </template>

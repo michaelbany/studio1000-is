@@ -26,7 +26,7 @@ class ProjectSchedule extends Model
 
     public function participants()
     {
-        return $this->belongsToMany(ProjectMember::class, 'schedule_participants')
+        return $this->belongsToMany(ProjectMember::class, 'schedule_participants', 'project_schedule_id', 'project_member_id')
             ->using(ScheduleParticipant::class)
             ->withPivot('call_time', 'wrap_time')
             ->as('participant')

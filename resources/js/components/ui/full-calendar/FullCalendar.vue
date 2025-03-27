@@ -10,10 +10,11 @@ export type CalendarEvent = {
     id: number;
     title: string;
     description: string;
-    location?: string;
+    location?: number;
     start: DateValue;
     end: DateValue;
     color?: string;
+    participants?: any;
 }
 
 type Emits = CalendarRootEmits & {
