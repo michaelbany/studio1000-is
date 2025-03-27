@@ -112,3 +112,10 @@ export function isDateInRange(date: DateValue, start: DateValue, end: DateValue)
 
     return start.compare(dayEnd) <= 0 && end.compare(dayStart) >= 0;
 }
+
+export const toISOStringFromDateAndTime = (date: Date, time: string) => {
+    const [hours, minutes] = time.split(':').map(Number);
+    const combined = new Date(date);
+    combined.setHours(hours, minutes, 0, 0);
+    return combined.toISOString();
+  };

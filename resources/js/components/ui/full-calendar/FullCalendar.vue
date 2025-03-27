@@ -10,6 +10,7 @@ export type CalendarEvent = {
     id: number;
     title: string;
     description: string;
+    location?: string;
     start: DateValue;
     end: DateValue;
     color?: string;

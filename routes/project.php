@@ -37,6 +37,10 @@ Route::group(['prefix' => 'project', 'middleware' => 'auth'], function () {
 
 
     // schedules
+    Route::post('/{project}/schedule', [ProjectScheduleController::class, 'store'])->name('project.schedules.store');
+    Route::put('/{project}/schedule/{schedule}', [ProjectScheduleController::class, 'update'])->name('project.schedules.update');
+    Route::delete('/{project}/schedule/{schedule}', [ProjectScheduleController::class, 'destroy'])->name('project.schedules.destroy');
+
 });
 
 Route::get('/test', function () {
