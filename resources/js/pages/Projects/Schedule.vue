@@ -33,6 +33,7 @@ import SheetFooter from '@/components/ui/sheet/SheetFooter.vue';
 import SheetHeader from '@/components/ui/sheet/SheetHeader.vue';
 import SheetTitle from '@/components/ui/sheet/SheetTitle.vue';
 import Textarea from '@/components/ui/textarea/Textarea.vue';
+import { can } from '@/composables/usePermissions';
 import AppLayout from '@/layouts/AppLayout.vue';
 import ProjectLayout from '@/layouts/project/Layout.vue';
 import { inicials, isDateInRange, label, toISOStringFromDateAndTime } from '@/lib/helpers';
@@ -191,7 +192,7 @@ const submitDelete = () => {
 }
 
 const handleDoubleClick = (date: DateValue | undefined) => {
-    if (!date) return;
+    if (!date || !can('project:update')) return;
 
     createModal.value = true;
     createForm.start_date = date.toDate(timeZone).toISOString().slice(0, 10);
@@ -255,9 +256,11 @@ const handleDoubleClick = (date: DateValue | undefined) => {
                                     <h3 class="flex w-full items-center gap-2 text-base font-medium">
                                         <div class="h-2 w-2 rounded-full bg-primary" :style="{ backgroundColor: event.color }"></div>
                                         {{ event.title }}
-                                        <Button size="icon" variant="ghost" @click="handleOpenEvent(event as CalendarEvent)" class="ml-auto">
-                                            <component :is="Edit" class="size-4 cursor-pointer text-muted-foreground" />
-                                        </Button>
+                                        <Can permission="project:update">
+                                            <Button size="icon" variant="ghost" @click="handleOpenEvent(event as CalendarEvent)" class="ml-auto">
+                                                <component :is="Edit" class="size-4 cursor-pointer text-muted-foreground" />
+                                            </Button>
+                                        </Can>
                                     </h3>
 
                                     <p class="flex items-center gap-1 text-sm text-muted-foreground" v-if="event.location">
