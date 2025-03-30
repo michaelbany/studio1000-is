@@ -65,23 +65,18 @@ const first = computed<CalendarEvent | null>(() => {
     return [...events.value].sort((a, b) => a.start.compare(b.start))[0];
 });
 
-const currentSelectedDate = ref<DateValue | undefined>();
-const eventsInRange = ref<CalendarEvent[]>([]);
+const currentSelectedDate = ref<DateValue|undefined>();
 
-function handleDateChanged(date: DateValue | undefined) {
-    if (!date) {
-        eventsInRange.value = [];
-        return;
-    }
+const eventsInRange = computed(() => {
+    if (!currentSelectedDate.value) return [];
 
-    currentSelectedDate.value = date;
-    eventsInRange.value = events.value.filter((event) => {
-        return isDateInRange(date, event.start as DateValue, event.end as DateValue);
-    });
-}
+    return events.value.filter((event) => {
+        return isDateInRange(currentSelectedDate.value ?? first.value?.start, event.start as DateValue, event.end as DateValue);
+    })
+});
 
 onMounted(() => {
-    handleDateChanged(first.value?.start);
+    currentSelectedDate.value = first.value?.start;
 });
 
 const createModal = ref(false);
@@ -221,7 +216,6 @@ const handleDoubleClick = (date: DateValue | undefined) => {
                 <FullCalendar
                     :weekStartsOn="1"
                     weekdayFormat="short"
-                    @update:model-value="handleDateChanged"
                     :events="events"
                     v-model="currentSelectedDate"
                     prevent-deselect

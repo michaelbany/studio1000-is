@@ -113,7 +113,8 @@ export function statusColor(status: string) {
     }
 }
 
-export function isDateInRange(date: DateValue, start: DateValue, end: DateValue) {
+export function isDateInRange(date?: DateValue, start?: DateValue, end?: DateValue) {
+    if (!date || !start || !end) return false;
     const dayStart = toCalendarDateTime(date).set({ hour: 0, minute: 0, second: 0 });
     const dayEnd = toCalendarDateTime(date).set({ hour: 23, minute: 59, second: 59 });
 
