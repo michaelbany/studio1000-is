@@ -4,7 +4,6 @@ import HeadingSmall from '@/components/HeadingSmall.vue';
 import InputError from '@/components/InputError.vue';
 import Avatar from '@/components/ui/avatar/Avatar.vue';
 import AvatarFallback from '@/components/ui/avatar/AvatarFallback.vue';
-import AvatarImage from '@/components/ui/avatar/AvatarImage.vue';
 import Button from '@/components/ui/button/Button.vue';
 import ColorPicker from '@/components/ui/ColorPicker.vue';
 import Dialog from '@/components/ui/dialog/Dialog.vue';
@@ -43,7 +42,7 @@ import ProjectLayout from '@/layouts/project/Layout.vue';
 import { ellipsis, inicials, isDateInRange, label, toISOStringFromDateAndTime } from '@/lib/helpers';
 import { Head, router, useForm, usePage } from '@inertiajs/vue3';
 import { fromDate, isSameDay, type DateValue } from '@internationalized/date';
-import { CalendarIcon, Edit, Pin, Plus } from 'lucide-vue-next';
+import { Calendar, Download, Edit, Pin, Plus } from 'lucide-vue-next';
 import { computed, onMounted, ref } from 'vue';
 
 const page = computed<any>(() => usePage().props);
@@ -203,6 +202,9 @@ const handleDoubleClick = (date: DateValue | undefined) => {
     createForm.start_date = date.toString();
     createForm.end_date = date.toString();
 };
+
+const calendarSubscribeUrl = `webcal://${page.value.ziggy.url.replace(/^https?:\/\//, '')}/calendar/user/${page.value.auth.user.id}/${page.value.auth.user.calendar_token}.ics?project=${page.value.project.id}`;
+const calendarDownloadUrl = `${page.value.ziggy.url}/calendar/user/${page.value.auth.user.id}/${page.value.auth.user.calendar_token}.ics?project=${page.value.project.id}`;
 </script>
 
 <template>
@@ -227,6 +229,16 @@ const handleDoubleClick = (date: DateValue | undefined) => {
                     prevent-deselect
                     @double-click="handleDoubleClick"
                 />
+
+                <div class="space-x-2 ml-auto">
+                    <Button as="a" size="sm" variant="secondary" :href="calendarSubscribeUrl" target="_blank">
+                        <component :is="Calendar" class="size-4" />
+                        Subscribe
+                    </Button>
+                    <Button as="a" size="sm" variant="outline" :href="calendarDownloadUrl" target="_blank">
+                        <component :is="Download" class="size-4" />
+                    </Button>
+                </div>
 
                 <Separator />
                 <div class="p-3">
@@ -280,11 +292,28 @@ const handleDoubleClick = (date: DateValue | undefined) => {
                                                 <Avatar>
                                                     <AvatarFallback><component :is="Pin" class="size-4 text-muted-foreground" /></AvatarFallback>
                                                 </Avatar>
-                                                <div class="space-y-1 grow">
-                                                    <h4 class="text-sm font-semibold">{{ page.locations.find((location: any) => location.id === event.location)?.name }}</h4>
-                                                    <p class="text-sm">{{ ellipsis(page.locations.find((location: any) => location.id === event.location)?.description ?? '', {length: 80}) }}</p>
+                                                <div class="grow space-y-1">
+                                                    <h4 class="text-sm font-semibold">
+                                                        {{ page.locations.find((location: any) => location.id === event.location)?.name }}
+                                                    </h4>
+                                                    <p class="text-sm">
+                                                        {{
+                                                            ellipsis(
+                                                                page.locations.find((location: any) => location.id === event.location)?.description ??
+                                                                    '',
+                                                                { length: 80 },
+                                                            )
+                                                        }}
+                                                    </p>
                                                     <div class="flex items-center pt-2">
-                                                        <span class="text-xs text-muted-foreground"> {{ ellipsis(page.locations.find((location: any) => location.id === event.location)?.address, {length: 100}) }} </span>
+                                                        <span class="text-xs text-muted-foreground">
+                                                            {{
+                                                                ellipsis(
+                                                                    page.locations.find((location: any) => location.id === event.location)?.address,
+                                                                    { length: 100 },
+                                                                )
+                                                            }}
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -435,7 +464,6 @@ const handleDoubleClick = (date: DateValue | undefined) => {
                                             :key="p"
                                             class="rounded-md bg-primary/10 px-2 py-1 text-primary"
                                         >
-
                                             {{ page.members.find((member: any) => member.id === p)?.name }}
                                         </div>
                                         <div v-else>Select participants</div>

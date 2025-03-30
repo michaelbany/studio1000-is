@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectMemberController;
 use App\Models\Project;
@@ -10,6 +11,8 @@ use Inertia\Inertia;
 Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('home');
+
+Route::get('/calendar/user/{user}/{token}.ics', [CalendarController::class, 'index']);
 
 Route::get('dashboard', function () {
     return Inertia::render('Dashboard', [

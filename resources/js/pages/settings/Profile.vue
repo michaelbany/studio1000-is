@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 
-import DeleteUser from '@/components/DeleteUser.vue';
 import HeadingSmall from '@/components/HeadingSmall.vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import Separator from '@/components/ui/separator/Separator.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { type BreadcrumbItem, type SharedData, type User } from '@/types';
+import { Calendar, Download } from 'lucide-vue-next';
 
 interface Props {
     mustVerifyEmail: boolean;
@@ -38,6 +39,9 @@ const submit = () => {
         preserveScroll: true,
     });
 };
+
+const calendarSubscribeUrl = `webcal://${page.props.ziggy.url.replace(/^https?:\/\//, '')}/calendar/user/${page.props.auth.user.id}/${page.props.auth.user.calendar_token}.ics`;
+const calendarDownloadUrl = `${page.props.ziggy.url}/calendar/user/${page.props.auth.user.id}/${page.props.auth.user.calendar_token}.ics`;
 </script>
 
 <template>
@@ -100,6 +104,41 @@ const submit = () => {
                         </Transition>
                     </div>
                 </form>
+            </div>
+
+            <div class="flex flex-col space-y-6">
+                <HeadingSmall title="Calendar and Events" description="Manage your calendar and events you are part of" />
+
+                <div class="space-x-2">
+                            <Button as="a" size="sm" variant="default" :href="calendarSubscribeUrl" target="_blank">
+                                <component :is="Calendar" class="size-4" />
+                                Subscribe to all
+                            </Button>
+                            <Button as="a" size="sm" variant="secondary" :href="calendarDownloadUrl" target="_blank">
+                                <component :is="Download" class="size-4" />
+                                Download all
+                            </Button>
+                        </div>
+
+                <div v-for="schedule in page.props.schedules" :key="schedule.id" class="flex items-start rounded-lg border p-4">
+                    <div class="w-10 flex-shrink-0">
+                        <component :is="Calendar" class="mt-1 size-5 text-primary" />
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold">{{ schedule.project.name }}</h3>
+                        <Separator class="my-2" />
+                        <div class="ml-auto space-x-2">
+                            <Button as="a" size="sm" variant="default" :href="calendarSubscribeUrl + '?project=' + schedule.project.id" target="_blank">
+                                <component :is="Calendar" class="size-4" />
+                                Subscribe
+                            </Button>
+                            <Button as="a" size="sm" variant="outline" :href="calendarDownloadUrl + '?project=' + schedule.project.id" target="_blank">
+                                <component :is="Download" class="size-4" />
+                                Download
+                            </Button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- <DeleteUser /> -->
