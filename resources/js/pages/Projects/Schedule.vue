@@ -178,6 +178,23 @@ const submitEdit = () => {
     );
 };
 
+const submitDelete = () => {
+
+    console.log('delete', editForm.id);
+    router.delete(route('project.schedules.destroy', [page.value.project.id, editForm.id]), {
+        onSuccess: () => {
+            editModal.value = false;
+            editForm.reset();
+            editForm.clearErrors();
+        },
+        onError: (errors) => {
+            Object.keys(errors).forEach((key) => {
+                editForm.setError(key as keyof typeof editForm.data, errors[key]);
+            });
+        },
+    })
+}
+
 const handleDoubleClick = (date: DateValue | undefined) => {
     if (!date) return;
 
@@ -426,7 +443,10 @@ const handleDoubleClick = (date: DateValue | undefined) => {
                         <SheetFooter>
                             <div class="flex w-full items-center justify-between gap-2">
                                 <ColorPicker v-model="editForm.color" id="color" :options="page.enum.schedule_color" />
-                                <Button type="submit" :disabled="editForm.processing"> Save </Button>
+                                <div class="space-x-2">
+                                    <Button variant="destructive" type="button" @click="submitDelete" :disabled="editForm.processing"> Delete </Button>
+                                    <Button type="submit" :disabled="editForm.processing"> Save </Button>
+                                </div>
                             </div>
                         </SheetFooter>
                     </form>
