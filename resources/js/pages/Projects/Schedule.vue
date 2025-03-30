@@ -200,8 +200,8 @@ const handleDoubleClick = (date: DateValue | undefined) => {
     if (!date || !can('project:update')) return;
 
     createModal.value = true;
-    createForm.start_date = date.toDate(timeZone).toISOString().slice(0, 10);
-    createForm.end_date = date.toDate(timeZone).toISOString().slice(0, 10);
+    createForm.start_date = date.toString();
+    createForm.end_date = date.toString();
 };
 </script>
 
