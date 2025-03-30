@@ -33,7 +33,7 @@ class LocationController extends Controller
 
         $project->locations()->create($request->only('name', 'address', 'description'));
 
-        return redirect()->route('project.locations', $project);
+        return redirect()->route('project.locations', $project)->with('success', 'Location created successfully.');
     }
 
     public function update(Request $request, Project $project, Location $location)

@@ -39,7 +39,7 @@ class ProjectController extends Controller
 
         $project->update($request->only('name', 'description', 'external_link', 'status'));
 
-        return redirect()->route('project.summary', $project);
+        return redirect()->route('project.summary', $project)->with('success', 'Project updated successfully.');
     }
 
     /**

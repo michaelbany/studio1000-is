@@ -43,7 +43,7 @@ class ProjectScheduleController extends Controller
 
         $project->schedules()->create($request->only('title', 'description', 'start_date', 'end_date', 'location_id', 'color'));
 
-        return redirect()->route('project.schedule', $project);
+        return redirect()->route('project.schedule', $project)->with('success', 'New schedule event created successfully.');
     }
 
     public function update(Request $request, Project $project, ProjectSchedule $schedule)

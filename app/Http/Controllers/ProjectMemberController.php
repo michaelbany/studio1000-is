@@ -51,7 +51,7 @@ class ProjectMemberController extends Controller
             $slot->save();
         }
 
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Slot created successfully.');
     }
 
 
@@ -112,8 +112,6 @@ class ProjectMemberController extends Controller
                 'apply' => 'You already have 3 or more pending requests.',
             ]);
         }
-
-        // $status = $user->role === RolesEnum::ADMIN || $project->owners()->contains($user) ? MembersStatusEnum::APPROVED : MembersStatusEnum::PENDING;
 
         $project->members()->attach($user->id, [
             'role' => $member->role,
