@@ -268,7 +268,7 @@ const groups = computed<Record<string, any>>(() => {
                                 <template v-if="member.user_id">
                                     <Can
                                         :permission="
-                                            (page.auth.user.id === member.user_id.id && member.role === 'owner') || member.user_id.role === 'admin'
+                                            (page.auth.user.id === member.user_id.id && member.role === 'owner') || (member.user_id.role === 'admin' && member.user_id.id !== page.auth.user.id)
                                                 ? false
                                                 : 'project:member_checkout'
                                         "
@@ -386,7 +386,7 @@ const groups = computed<Record<string, any>>(() => {
                                     :disabled="
                                         slotForm.processing ||
                                         (page.auth.user.id === slotEditForm.user?.id && slotEditForm.role === 'owner') ||
-                                        slotEditForm.user?.role === 'admin'
+                                        (slotEditForm.user?.role === 'admin' && slotEditForm.user?.id !== page.auth.user.id)
                                     "
                                     @click="submitEditSlot(false)"
                                 >
