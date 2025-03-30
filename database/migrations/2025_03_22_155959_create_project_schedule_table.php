@@ -21,6 +21,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->dateTime('start_date');
             $table->dateTime('end_date');
+            $table->string('color')->nullable();
             $table->timestamps();
         });
     }

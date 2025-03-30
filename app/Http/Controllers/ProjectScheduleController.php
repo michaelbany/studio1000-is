@@ -19,9 +19,9 @@ class ProjectScheduleController extends Controller
 
         return inertia('Projects/Schedule', [
             'project' => $project,
-            'schedules' => $project->schedules->load('participants.user'),
+            'schedules' => $project->schedules->load('participants')->filter(fn($schedule) => Gate::allows('view', $schedule))->values(),
             'locations' => $project->locations,
-            'members' => $project->approvedMembers->unique('id'),
+            'members' => $project->approvedMembers->unique('id')->values(),
             'enum' => [
                 'schedule_color' => ScheduleColorEnum::cases(),
             ]

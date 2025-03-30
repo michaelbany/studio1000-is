@@ -59,4 +59,13 @@ class User extends Authenticatable
             ->as('membership')
             ->withTimestamps();
     }
+
+    public function schedules()
+    {
+        return $this->belongsToMany(ProjectSchedule::class, 'schedule_participants', 'user_id', 'project_schedule_id')
+            ->using(ScheduleParticipant::class)
+            ->withPivot('call_time', 'wrap_time')
+            ->as('participant')
+            ->withTimestamps();
+    }
 }

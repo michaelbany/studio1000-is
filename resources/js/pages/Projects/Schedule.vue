@@ -4,6 +4,7 @@ import HeadingSmall from '@/components/HeadingSmall.vue';
 import InputError from '@/components/InputError.vue';
 import Avatar from '@/components/ui/avatar/Avatar.vue';
 import AvatarFallback from '@/components/ui/avatar/AvatarFallback.vue';
+import AvatarImage from '@/components/ui/avatar/AvatarImage.vue';
 import Button from '@/components/ui/button/Button.vue';
 import ColorPicker from '@/components/ui/ColorPicker.vue';
 import Dialog from '@/components/ui/dialog/Dialog.vue';
@@ -18,6 +19,9 @@ import DropdownMenuContent from '@/components/ui/dropdown-menu/DropdownMenuConte
 import DropdownMenuTrigger from '@/components/ui/dropdown-menu/DropdownMenuTrigger.vue';
 import { FullCalendar } from '@/components/ui/full-calendar';
 import { CalendarEvent } from '@/components/ui/full-calendar/FullCalendar.vue';
+import HoverCard from '@/components/ui/hover-card/HoverCard.vue';
+import HoverCardContent from '@/components/ui/hover-card/HoverCardContent.vue';
+import HoverCardTrigger from '@/components/ui/hover-card/HoverCardTrigger.vue';
 import Input from '@/components/ui/input/Input.vue';
 import Label from '@/components/ui/label/Label.vue';
 import Select from '@/components/ui/select/Select.vue';
@@ -36,10 +40,10 @@ import Textarea from '@/components/ui/textarea/Textarea.vue';
 import { can } from '@/composables/usePermissions';
 import AppLayout from '@/layouts/AppLayout.vue';
 import ProjectLayout from '@/layouts/project/Layout.vue';
-import { inicials, isDateInRange, label, toISOStringFromDateAndTime } from '@/lib/helpers';
+import { ellipsis, inicials, isDateInRange, label, toISOStringFromDateAndTime } from '@/lib/helpers';
 import { Head, router, useForm, usePage } from '@inertiajs/vue3';
 import { fromDate, isSameDay, type DateValue } from '@internationalized/date';
-import { Edit, Pin, Plus } from 'lucide-vue-next';
+import { CalendarIcon, Edit, Pin, Plus } from 'lucide-vue-next';
 import { computed, onMounted, ref } from 'vue';
 
 const page = computed<any>(() => usePage().props);
@@ -48,16 +52,18 @@ const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const events = computed<CalendarEvent[]>(() => {
     if (!page.value.schedules) return [];
 
-    return page.value.schedules.map((schedule: any) => ({
-        id: schedule.id,
-        title: schedule.title,
-        description: schedule.description,
-        location: schedule.location_id,
-        start: fromDate(new Date(schedule.start_date), timeZone),
-        end: fromDate(new Date(schedule.end_date), timeZone),
-        color: schedule.color,
-        participants: schedule.participants,
-    })).sort((a: any, b: any) => a.start.compare(b.start));
+    return page.value.schedules
+        .map((schedule: any) => ({
+            id: schedule.id,
+            title: schedule.title,
+            description: schedule.description,
+            location: schedule.location_id,
+            start: fromDate(new Date(schedule.start_date), timeZone),
+            end: fromDate(new Date(schedule.end_date), timeZone),
+            color: schedule.color,
+            participants: schedule.participants,
+        }))
+        .sort((a: any, b: any) => a.start.compare(b.start));
 });
 
 const first = computed<CalendarEvent | null>(() => {
@@ -66,14 +72,14 @@ const first = computed<CalendarEvent | null>(() => {
     return [...events.value].sort((a, b) => a.start.compare(b.start))[0];
 });
 
-const currentSelectedDate = ref<DateValue|undefined>();
+const currentSelectedDate = ref<DateValue | undefined>();
 
 const eventsInRange = computed(() => {
     if (!currentSelectedDate.value) return [];
 
     return events.value.filter((event) => {
         return isDateInRange(currentSelectedDate.value ?? first.value?.start, event.start as DateValue, event.end as DateValue);
-    })
+    });
 });
 
 onMounted(() => {
@@ -175,7 +181,6 @@ const submitEdit = () => {
 };
 
 const submitDelete = () => {
-
     console.log('delete', editForm.id);
     router.delete(route('project.schedules.destroy', [page.value.project.id, editForm.id]), {
         onSuccess: () => {
@@ -188,8 +193,8 @@ const submitDelete = () => {
                 editForm.setError(key as keyof typeof editForm.data, errors[key]);
             });
         },
-    })
-}
+    });
+};
 
 const handleDoubleClick = (date: DateValue | undefined) => {
     if (!date || !can('project:update')) return;
@@ -263,10 +268,28 @@ const handleDoubleClick = (date: DateValue | undefined) => {
                                         </Can>
                                     </h3>
 
-                                    <p class="flex items-center gap-1 text-sm text-muted-foreground" v-if="event.location">
-                                        <component :is="Pin" class="size-4 text-muted-foreground" />
-                                        {{ page.locations.find((location: any) => location.id === event.location)?.name }}
-                                    </p>
+                                    <HoverCard>
+                                        <HoverCardTrigger as-child>
+                                            <p class="flex items-center gap-1 text-sm text-muted-foreground" v-if="event.location">
+                                                <component :is="Pin" class="size-4 text-muted-foreground" />
+                                                {{ page.locations.find((location: any) => location.id === event.location)?.name }}
+                                            </p>
+                                        </HoverCardTrigger>
+                                        <HoverCardContent class="w-80">
+                                            <div class="flex justify-between space-x-4">
+                                                <Avatar>
+                                                    <AvatarFallback><component :is="Pin" class="size-4 text-muted-foreground" /></AvatarFallback>
+                                                </Avatar>
+                                                <div class="space-y-1 grow">
+                                                    <h4 class="text-sm font-semibold">{{ page.locations.find((location: any) => location.id === event.location)?.name }}</h4>
+                                                    <p class="text-sm">{{ ellipsis(page.locations.find((location: any) => location.id === event.location)?.description ?? '', {length: 80}) }}</p>
+                                                    <div class="flex items-center pt-2">
+                                                        <span class="text-xs text-muted-foreground"> {{ ellipsis(page.locations.find((location: any) => location.id === event.location)?.address, {length: 100}) }} </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </HoverCardContent>
+                                    </HoverCard>
                                     <Separator class="my-2" v-if="event.description" />
                                     <p class="text-sm text-muted-foreground">{{ event.description }}</p>
 
@@ -276,7 +299,7 @@ const handleDoubleClick = (date: DateValue | undefined) => {
                                             <AvatarFallback
                                                 class="rounded-lg bg-neutral-200 font-semibold text-black dark:bg-neutral-700 dark:text-white"
                                             >
-                                                {{ inicials(participant.user.name) }}
+                                                {{ inicials(participant.name) }}
                                             </AvatarFallback>
                                         </Avatar>
                                     </div>
@@ -403,7 +426,6 @@ const handleDoubleClick = (date: DateValue | undefined) => {
 
                         <div class="mt-2 grid gap-2">
                             <Label for="participants">Participants</Label>
-
                             <DropdownMenu>
                                 <DropdownMenuTrigger as-child>
                                     <Button variant="outline" class="flex justify-start gap-1 p-3">
@@ -413,7 +435,8 @@ const handleDoubleClick = (date: DateValue | undefined) => {
                                             :key="p"
                                             class="rounded-md bg-primary/10 px-2 py-1 text-primary"
                                         >
-                                            {{ page.members.find((member: any) => member.membership.id === p)?.name }}
+
+                                            {{ page.members.find((member: any) => member.id === p)?.name }}
                                         </div>
                                         <div v-else>Select participants</div>
                                     </Button>
@@ -421,13 +444,13 @@ const handleDoubleClick = (date: DateValue | undefined) => {
                                 <DropdownMenuContent class="w-56">
                                     <DropdownMenuCheckboxItem
                                         v-for="participant in page.members"
-                                        :key="participant.membership.id"
+                                        :key="participant.id"
                                         @select="(e) => e.preventDefault()"
-                                        :checked="editForm.participants.includes(participant.membership.id as never)"
+                                        :checked="editForm.participants.includes(participant.id as never)"
                                         @update:checked="
-                                            editForm.participants.includes(participant.membership.id as never)
-                                                ? editForm.participants.splice(editForm.participants.indexOf(participant.membership.id as never), 1)
-                                                : editForm.participants.push(participant.membership.id as never)
+                                            editForm.participants.includes(participant.id as never)
+                                                ? editForm.participants.splice(editForm.participants.indexOf(participant.id as never), 1)
+                                                : editForm.participants.push(participant.id as never)
                                         "
                                     >
                                         {{ participant.name }}
@@ -441,7 +464,9 @@ const handleDoubleClick = (date: DateValue | undefined) => {
                             <div class="flex w-full items-center justify-between gap-2">
                                 <ColorPicker v-model="editForm.color" id="color" :options="page.enum.schedule_color" />
                                 <div class="space-x-2">
-                                    <Button variant="destructive" type="button" @click="submitDelete" :disabled="editForm.processing"> Delete </Button>
+                                    <Button variant="destructive" type="button" @click="submitDelete" :disabled="editForm.processing">
+                                        Delete
+                                    </Button>
                                     <Button type="submit" :disabled="editForm.processing"> Save </Button>
                                 </div>
                             </div>

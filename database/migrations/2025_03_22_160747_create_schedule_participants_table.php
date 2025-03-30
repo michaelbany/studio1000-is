@@ -2,6 +2,7 @@
 
 use App\Models\ProjectMember;
 use App\Models\ProjectSchedule;
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,7 +17,7 @@ return new class extends Migration
         Schema::create('schedule_participants', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(ProjectSchedule::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(ProjectMember::class, 'project_member_id')->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(User::class, 'user_id')->constrained()->cascadeOnDelete();
             $table->time('call_time')->nullable();
             $table->time('wrap_time')->nullable();
             $table->timestamps();

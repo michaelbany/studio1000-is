@@ -19,8 +19,8 @@ class ScheduleParticipant extends Pivot
         return $this->belongsTo(ProjectSchedule::class);
     }
 
-    public function member()
+    public function user()
     {
-        return $this->belongsTo(ProjectMember::class);
+        return $this->belongsTo(User::class);
     }
 }
