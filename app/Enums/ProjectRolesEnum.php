@@ -9,6 +9,7 @@ enum ProjectRolesEnum: string
     case WRITER = 'writer';
     case ACTOR = 'actor';
     case EDITOR = 'editor';
+    case MUSIC = 'music';
     case SOUND_ENGINEER = 'sound_engineer';
     case CAMERA_OPERATOR = 'camera_operator';
     case LIGHTING_TECHNICIAN = 'lighting_technician';
